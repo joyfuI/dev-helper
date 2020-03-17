@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div>
+	{{ macros.info_text_and_buttons('ffmpeg', 'FFmpeg 업데이트', [['ffmpeg_version', '버전확인'], ['ffmpeg_git', 'git master'], ['ffmpeg_release', 'release']], desc=['git master: ' + arg['ffmpeg_git'], 'release: ' + arg['ffmpeg_release']]) }}
+</div>
+
+<script>
+	"use strict";
+	var package_name = '{{ arg["package_name"] }}';
+
+	var ffmpeg_git = '{{ arg["ffmpeg_git"] }}', ffmpeg_release = '{{ arg["ffmpeg_release"] }}';
+
+	$(function () {
+		// FFmpeg 버전확인
+		$('#ffmpeg_version').click(function () {
+			$.ajax({
+				url: '/ffmpeg/ajax/ffmpeg_version',
+				type: 'POST',
+				cache: false,
+				data: { },
+				dataType: 'json',
+				success: function (data) {
+					var str = '';
+					for (var i = 0; i < data.length; i++) {
+						str += '<div>' + data[i] + '</div>';
+					}
+					$('#modal_title').html('ffmpeg -version');
+					$('#modal_body').html(str);
+					$('#large_modal').modal();
+				}
+			});
+			return false;
+		});
+
+		// FFmpeg 업데이트 (git master)
+		$('#ffmpeg_git').click(function () {
+			$.ajax({
+				url: '/' + package_name + '/ajax/ffmpeg',
+				type: 'POST',
+				cache: false,
+				data: {
+					type: 'git',
+					name: ffmpeg_git
+				},
+				dataType: 'json',
+				success: success
+			});
+			return false;
+		});
+
+		// FFmpeg 업데이트 (release)
+		$('#ffmpeg_release').click(function () {
+			$.ajax({
+				url: '/' + package_name + '/ajax/ffmpeg',
+				type: 'POST',
+				cache: false,
+				data: {
+					type: 'release',
+					name: ffmpeg_release
+				},
+				dataType: 'json',
+				success: success
+			});
+			return false;
+		});
+
+		function success(data) {
+			if (!data.success) {
+				$.notify('<strong>' + data.message + '</strong>', {
+					type: 'warning'
+				});
+			}
+		}
+	});
+</script>
+
+{% endblock %}

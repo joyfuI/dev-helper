@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+
+<ul class="nav nav-pills bg-light shadow text-dark">
+	<li class="nav-item"><a class="nav-link active" href="./app.config"><b>app.config</b></a></li>
+{#	{% for i in arg['dbs'] %}#}
+{#		{% if i == arg['plugin'] %}#}
+{#			<li class="nav-item"><a class="nav-link active" href="./{{ i }}">{{ i }}</a></li>#}
+{#		{% else %}#}
+{#			<li class="nav-item"><a class="nav-link" href="./{{ i }}">{{ i }}</a></li>#}
+{#		{% endif %}#}
+{#	{% endfor %}#}
+</ul>
+<div class="d-inline-block"></div>
+
+<div>
+	{% for i in arg['config'] %}
+		<div>{{ i.replace('  ', '&nbsp;&nbsp;')|safe }}</div>
+	{% endfor %}
+</div>
+
+{% endblock %}

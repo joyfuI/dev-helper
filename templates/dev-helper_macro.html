@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+{% block content %}
+
+{{ macros.info_text_go('', 'macro.html', 'https://github.com/soju6jan/SJVA2/blob/master/templates/macro.html') }}
+{{ macros.m_hr() }}
+
+<h5>macros.setting_top(left='', padding='10')</h5>
+{{ macros.setting_top(left='left', padding='10') }}
+
+<br><br>
+
+<h5>macros.setting_bottom(desc=None, padding_top='5')</h5>
+{{ macros.setting_bottom(desc='desc', padding_top='5') }}
+
+<br><br>
+
+<h5>macros.setting_input_int(id, left, value='', min='', max='', placeholder='', desc=None)</h5>
+{{ macros.setting_input_int('id', 'left', value='value', min='0', max='10', placeholder='placeholder', desc='desc') }}
+
+<br><br>
+
+<h5>macros.setting_input_text(id, left, value='', col='9', placeholder='', desc='', type='text', disabled=False)</h5>
+{{ macros.setting_input_text('id', 'left', value='value', col='9', placeholder='placeholder', desc='desc', type='text', disabled=False) }}
+
+<br><br>
+
+<h5>macros.setting_checkbox(id, left, value, desc='')</h5>
+{{ macros.setting_checkbox('id', 'left', 'true', desc='desc') }}
+
+<br><br>
+
+<h5>macros.setting_default_checkbox(id, left, label, value, desc='')</h5>
+{{ macros.setting_default_checkbox('id', 'left', 'label', 'true', desc='desc') }}
+
+<br><br>
+
+<h5>macros.setting_scheduler_switch(left='스케쥴링 작동', desc=['On : 스케쥴링 시작','Off : 스케쥴링 중지'], is_include='False', is_running='False')</h5>
+{{ macros.setting_scheduler_switch(left='스케쥴링 작동', desc=['On : 스케쥴링 시작','Off : 스케쥴링 중지'], is_include='False', is_running='False') }}
+
+<br><br>
+
+<h5>macros.info_text(id, left, value='', desc=None)</h5>
+{{ macros.info_text('id', 'left', value='value', desc='desc') }}
+
+<br><br>
+
+<h5>macros.info_text_go(id, left, value='', desc=None)</h5>
+{{ macros.info_text_go('id', 'left', value='value', desc='desc') }}
+
+<br><br>
+
+<h5>macros.info_text_go_button(id, left, buttons, value='', desc=None)</h5>
+{{ macros.info_text_go_button('id', 'left', [['button1', '버튼1'], ['button2', '버튼2']], value='value', desc='desc') }}
+
+<br><br>
+
+<h5>macros.info_text_and_buttons(id, left, buttons, value='', desc=None)</h5>
+{{ macros.info_text_and_buttons('id', 'left', [['button1', '버튼1'], ['button2', '버튼2']], value='value', desc='desc') }}
+
+<br><br>
+
+<h5>macros.setting_input_text_and_buttons(id, left, buttons, value='', col='9', placeholder='', desc='', type='text', disabled=False)</h5>
+{{ macros.setting_input_text_and_buttons('id', 'left', [['button1', '버튼1'], ['button2', '버튼2']], value='value', col='9', placeholder='placeholder', desc='desc', type='text', disabled=False) }}
+
+<br><br>
+
+<h5>macros.setting_button(buttons, left='', desc='')</h5>
+{{ macros.setting_button([['button1', '버튼1'], ['button2', '버튼2']], left='left', desc='desc') }}
+
+<br><br>
+
+<h5>macros.setting_button_with_info(buttons, left='', desc='')</h5>
+{{ macros.setting_button_with_info([['button1', '버튼1'], ['button2', '버튼2']], left='left', desc='desc') }}
+
+<br><br>
+
+<h5>macros.setting_radio(id, title, radios, value=None, desc=None)</h5>
+{{ macros.setting_radio('id', 'title', ['button1', 'button2'], value='1', desc=None) }}
+
+<br><br>
+
+<h5>macros.setting_select(id, title, options, col='9', desc=None, value=None)</h5>
+{{ macros.setting_select('id', 'title', [['list1', '목록1'], ['list2', '목록2']], col='9', desc='desc', value='list2') }}
+
+<br><br>
+
+<h5>macros.select(id, options, col='3', value=None)</h5>
+{{ macros.select('id', [['list1', '목록1'], ['list2', '목록2']], col='3', value='list2') }}
+
+<br><br>
+
+<h5>macros.setting_select_and_buttons(id, title, options, buttons, col='9', desc=None, value=None)</h5>
+{{ macros.setting_select_and_buttons('id', 'title', [['list1', '목록1'], ['list2', '목록2']], [['button1', '버튼1'], ['button2', '버튼2']], col='9', desc='desc', value='list2') }}
+
+<br><br>
+
+<h5>macros.setting_select_empty(id, title, col='9', desc=None, value=None)</h5>
+{{ macros.setting_select_empty('id', 'title', col='9', desc='desc', value=None) }}
+
+<br><br>
+
+<h5>macros.setting_input_textarea(id, left, value='', col='9', row='3', desc='', disabled=False)</h5>
+{{ macros.setting_input_textarea('id', 'left', value='value', col='9', row='3', desc='desc', disabled=False) }}
+
+<br><br>
+
+<h5>macros.setting_progress(id, left='', desc='')</h5>
+{{ macros.setting_progress('id', left='left', desc='desc') }}
+
+<br><br>
+
+<h5>macros.setting_scheduler_button(is_include, is_running, id='scheduler', left='스케쥴링 작동', desc=['On : 스케쥴링 시작','Off : 스케쥴링 중지'])</h5>
+{{ macros.setting_scheduler_button('True', 'True', id='scheduler', left='스케쥴링 작동', desc=['On : 스케쥴링 시작','Off : 스케쥴링 중지']) }}
+
+<br><br>
+
+<h5>macros.setting_global_scheduler_button(is_include, is_running, id='scheduler', left='스케쥴링 작동', desc=['On : 스케쥴링 시작','Off : 스케쥴링 중지'])</h5>
+{{ macros.setting_global_scheduler_button('True', 'True', id='scheduler', left='스케쥴링 작동', desc=['On : 스케쥴링 시작','Off : 스케쥴링 중지']) }}
+
+<br><br>
+
+<h5>macros.setting_global_scheduler_sub_button(is_include, is_running, id='scheduler', left='스케쥴링 작동', desc=['On : 스케쥴링 시작','Off : 스케쥴링 중지'])</h5>
+{{ macros.setting_global_scheduler_sub_button('True', 'True', id='scheduler', left='스케쥴링 작동', desc=['On : 스케쥴링 시작','Off : 스케쥴링 중지']) }}
+
+<br><br>
+
+<h5>macros.m_row_start(padding='10', align='center')</h5>
+<h5>macros.m_col(width, html, align='left')</h5>
+<h5>macros.m_col(width, html, align='left')</h5>
+<h5>macros.m_row_end()</h5>
+{{ macros.m_row_start(padding='10', align='center') }}
+{{ macros.m_col(1, 'html1', align='left') }}
+{{ macros.m_col(3, 'html3', align='left') }}
+{{ macros.m_row_end() }}
+
+<br><br>
+
+<h5>macros.m_strong(html)</h5>
+{{ macros.m_strong('html') }}
+
+<br><br>
+
+<h5>macros.m_hr()</h5>
+{{ macros.m_hr() }}
+
+<br><br>
+
+<h5>macros.m_hr_black()</h5>
+{{ macros.m_hr_black() }}
+
+<br><br>
+
+<h5>macros.m_hr_head_top()</h5>
+{{ macros.m_hr_head_top() }}
+
+<br><br>
+
+<h5>macros.m_hr_head_bottom()</h5>
+{{ macros.m_hr_head_bottom() }}
+
+<br><br>
+
+<h5>macros.m_button(id, text)</h5>
+{{ macros.m_button('id', 'text') }}
+
+<br><br>
+
+<h5>macros.m_button_group(buttons)</h5>
+{{ macros.m_button_group([['button1', '버튼1'], ['button2', '버튼2']]) }}
+
+<br><br>
+
+<h5>macros.m_tab_head_start()</h5>
+<h5>macros.m_tab_head(name, active)</h5>
+<h5>macros.m_tab_head2(name, title, active)</h5>
+<h5>macros.m_tab_head_end()</h5>
+{{ macros.m_tab_head_start() }}
+{{ macros.m_tab_head('name', false) }}
+{{ macros.m_tab_head2('name2', 'title', true) }}
+{{ macros.m_tab_head_end() }}
+
+<br><br>
+
+<h5>macros.m_tab_content_start(name, active)</h5>
+<u>test1</u>
+<h5>macros.m_tab_content_end()</h5>
+{{ macros.m_tab_content_start('name', false) }}
+<u>test1</u>
+{{ macros.m_tab_content_end() }}
+<h5>macros.m_tab_content_start(name, active)</h5>
+<u>test2</u>
+<h5>macros.m_tab_content_end()</h5>
+{{ macros.m_tab_content_start('name2', true) }}
+<u>test2</u>
+{{ macros.m_tab_content_end() }}
+
+<br><br>
+
+<h5>macros.m_modal_start(id, title, size)</h5>
+<u>test</u>
+<h5>macros.m_modal_end()</h5>
+{{ macros.m_modal_start('id', 'title', '') }}
+<u>test</u>
+{{ macros.m_modal_end() }}
+
+{% endblock %}
