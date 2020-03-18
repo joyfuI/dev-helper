@@ -31,7 +31,7 @@ menu = {
 }
 
 plugin_info = {
-	'version': '0.1.0',
+	'version': '0.1.1',
 	'name': 'dev-helper',
 	'category_name': 'tool',
 	'developer': 'joyfuI',
