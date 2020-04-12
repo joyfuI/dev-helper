@@ -25,13 +25,13 @@ blueprint = Blueprint(package_name, package_name, url_prefix='/%s' % package_nam
 menu = {
 	'main': [package_name, '플러그인 개발'],
 	'sub': [
-		['info', '정보'], ['py', '파이썬'], ['db', '데이터베이스'], ['log', '로그'], ['lib', '라이브러리'], ['macro', '템플릿 매크로']
+		['info', '정보'], ['py', '파이썬'], ['db', '데이터베이스'], ['log', '로그'], ['macro', '템플릿 매크로']
 	],
 	'category': 'tool'
 }
 
 plugin_info = {
-	'version': '0.1.1',
+	'version': '0.1.2',
 	'name': 'dev-helper',
 	'category_name': 'tool',
 	'developer': 'joyfuI',
