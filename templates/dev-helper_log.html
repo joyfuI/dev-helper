@@ -52,13 +52,13 @@
 <script>
     $(function () {
         "use strict";
-        var package_name = '{{ arg["package_name"] }}';
+        const package_name = '{{ arg["package_name"] }}';
 
         $('#loading').show();
-        var socket = io.connect(location.origin + '/log');
+        let socket = io.connect(`${location.origin}/log`);
 
         $(window).resize(function () {
-            var clientHeight = innerHeight - $('.container > div:nth-child(2) > ul:nth-child(1)').height() - 260;
+            let clientHeight = innerHeight - $('.container > div:nth-child(2) > ul:nth-child(1)').height() - 260;
             $('#log').height(clientHeight);
             $('#add').height(clientHeight);
         }).resize();
@@ -68,7 +68,7 @@
         });
 
         socket.on('on_start', function (data) {
-            var log = $('#log');
+            let log = $('#log');
             log.html(log.html() + data.data);
             log.scrollTop(log.prop('scrollHeight'));
             $('#loading').hide();
@@ -76,7 +76,7 @@
 
         socket.on('add', function (data) {
             if (data.package === '{{ arg["plugin"] }}') {
-                var add = $('#add');
+                let add = $('#add');
                 add.html(add.html() + data.data);
                 if ($('#auto_scroll').prop('checked')) {
                     add.scrollTop(add.prop('scrollHeight'));
@@ -91,7 +91,7 @@
 
         $('#delete').click(function () {
             $.ajax({
-                url: '/' + package_name + '/ajax/delete',
+                url: `/${package_name}/ajax/delete`,
                 type: 'POST',
                 cache: false,
                 data: {

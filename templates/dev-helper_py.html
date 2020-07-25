@@ -13,12 +13,12 @@
 
 <script>
     "use strict";
-    var package_name = '{{ arg["package_name"] }}';
+    const package_name = '{{ arg["package_name"] }}';
 
     $(function () {
         // 패키지 설치
         $('#install_btn').click(function () {
-            var name = $('#package').val();
+            let name = $('#package').val();
             if (name === '') {
                 $.notify('<strong>패키지명을 입력하세요.</strong>', {
                     type: 'warning'
@@ -26,7 +26,7 @@
                 return;
             }
             $.ajax({
-                url: '/' + package_name + '/ajax/install',
+                url: `/${package_name}/ajax/install`,
                 type: 'POST',
                 cache: false,
                 data: {
@@ -34,9 +34,9 @@
                 },
                 dataType: 'json',
                 success: function (data) {
-                    var str = '';
-                    for (var i = 0; i < data.length; i++) {
-                        str += '<div>' + data[i] + '</div>';
+                    let str = '';
+                    for (let i = 0; i < data.length; i++) {
+                        str += `<div>${data[i]}</div>`;
                     }
                     $('#modal_title').html(name);
                     $('#modal_body').html(str);
@@ -47,20 +47,20 @@
         });
 
         // 패키지 업데이트/제거
-        $("#list").on('click', 'button', function () {
-            var btn = $(this);
-            var name = btn.attr('id');
+        $('#list').on('click', 'button', function () {
+            let btn = $(this);
+            let name = btn.attr('id');
             switch (btn.text()) {
                 case '업데이트':
                     name = name.replace(/_upgrade$/, '');
                     $.ajax({
-                        url: '/' + package_name + '/ajax/install',
-                        type: "POST",
+                        url: `/${package_name}/ajax/install`,
+                        type: 'POST',
                         cache: false,
                         data: {
                             name: name
                         },
-                        dataType: "json",
+                        dataType: 'json',
                         success: showModal
                     });
                     break;
@@ -68,13 +68,13 @@
                 case '제거':
                     name = name.replace(/_uninstall$/, '');
                     $.ajax({
-                        url: '/' + package_name + '/ajax/uninstall',
-                        type: "POST",
+                        url: `/${package_name}/ajax/uninstall`,
+                        type: 'POST',
                         cache: false,
                         data: {
                             name: name
                         },
-                        dataType: "json",
+                        dataType: 'json',
                         success: showModal
                     });
                     break;
@@ -84,13 +84,13 @@
     });
 
     function showModal(data) {
-        var str = '';
-        for (var i = 0; i < data['content'].length; i++) {
-            str += "<div>" + data['content'][i] + "</div>";
+        let str = '';
+        for (let i = 0; i < data['content'].length; i++) {
+            str += `<div>${data['content'][i]}</div>`;
         }
-        document.getElementById("modal_title").innerHTML = data['title'];
-        document.getElementById("modal_body").innerHTML = str;
-        $("#large_modal").modal();
+        document.getElementById('modal_title').innerHTML = data['title'];
+        document.getElementById('modal_body').innerHTML = str;
+        $('#large_modal').modal();
     }
 </script>
 
