@@ -2,96 +2,96 @@
 {% block content %}
 
 <div>
-	{{ macros.setting_input_text_and_buttons('package', '설치할 패키지명', [['install_btn', '설치']]) }}
-	{{ macros.m_hr() }}
-	<div id="list">
-		{% for i in arg['packages'] %}
-			{{ macros.info_text_and_buttons(i[0], i[0], [[i[0] + '_ver', i[1]], [i[0] + '_upgrade', '업데이트'], [i[0] + '_uninstall', '제거']]) }}
-		{% endfor %}
-	</div>
+    {{ macros.setting_input_text_and_buttons('package', '설치할 패키지명', [['install_btn', '설치']]) }}
+    {{ macros.m_hr() }}
+    <div id="list">
+        {% for i in arg['packages'] %}
+            {{ macros.info_text_and_buttons(i[0], i[0], [[i[0] + '_ver', i[1]], [i[0] + '_upgrade', '업데이트'], [i[0] + '_uninstall', '제거']]) }}
+        {% endfor %}
+    </div>
 </div>
 
 <script>
-	"use strict";
-	var package_name = '{{ arg["package_name"] }}';
+    "use strict";
+    var package_name = '{{ arg["package_name"] }}';
 
-	$(function () {
-		// 패키지 설치
-		$('#install_btn').click(function () {
-			var name = $('#package').val();
-			if (name === '') {
-				$.notify('<strong>패키지명을 입력하세요.</strong>', {
-					type: 'warning'
-				});
-				return;
-			}
-			$.ajax({
-				url: '/' + package_name + '/ajax/install',
-				type: 'POST',
-				cache: false,
-				data: {
-					name: name
-				},
-				dataType: 'json',
-				success: function (data) {
-					var str = '';
-					for (var i = 0; i < data.length; i++) {
-						str += '<div>' + data[i] + '</div>';
-					}
-					$('#modal_title').html(name);
-					$('#modal_body').html(str);
-					$('#large_modal').modal();
-				}
-			});
-			return false;
-		});
+    $(function () {
+        // 패키지 설치
+        $('#install_btn').click(function () {
+            var name = $('#package').val();
+            if (name === '') {
+                $.notify('<strong>패키지명을 입력하세요.</strong>', {
+                    type: 'warning'
+                });
+                return;
+            }
+            $.ajax({
+                url: '/' + package_name + '/ajax/install',
+                type: 'POST',
+                cache: false,
+                data: {
+                    name: name
+                },
+                dataType: 'json',
+                success: function (data) {
+                    var str = '';
+                    for (var i = 0; i < data.length; i++) {
+                        str += '<div>' + data[i] + '</div>';
+                    }
+                    $('#modal_title').html(name);
+                    $('#modal_body').html(str);
+                    $('#large_modal').modal();
+                }
+            });
+            return false;
+        });
 
-		// 패키지 업데이트/제거
-		$("#list").on('click', 'button', function () {
-			var btn = $(this);
-			var name = btn.attr('id');
-			switch (btn.text()) {
-				case '업데이트':
-					name = name.replace(/_upgrade$/, '');
-					$.ajax({
-						url: '/' + package_name + '/ajax/install',
-						type: "POST",
-						cache: false,
-						data: {
-							name: name
-						},
-						dataType: "json",
-						success: showModal
-					});
-					break;
+        // 패키지 업데이트/제거
+        $("#list").on('click', 'button', function () {
+            var btn = $(this);
+            var name = btn.attr('id');
+            switch (btn.text()) {
+                case '업데이트':
+                    name = name.replace(/_upgrade$/, '');
+                    $.ajax({
+                        url: '/' + package_name + '/ajax/install',
+                        type: "POST",
+                        cache: false,
+                        data: {
+                            name: name
+                        },
+                        dataType: "json",
+                        success: showModal
+                    });
+                    break;
 
-				case '제거':
-					name = name.replace(/_uninstall$/, '');
-					$.ajax({
-						url: '/' + package_name + '/ajax/uninstall',
-						type: "POST",
-						cache: false,
-						data: {
-							name: name
-						},
-						dataType: "json",
-						success: showModal
-					});
-					break;
-			}
-			return false;
-		});
-	});
+                case '제거':
+                    name = name.replace(/_uninstall$/, '');
+                    $.ajax({
+                        url: '/' + package_name + '/ajax/uninstall',
+                        type: "POST",
+                        cache: false,
+                        data: {
+                            name: name
+                        },
+                        dataType: "json",
+                        success: showModal
+                    });
+                    break;
+            }
+            return false;
+        });
+    });
 
-	function showModal(data) {
-		var str = '';
-		for (var i = 0; i < data['content'].length; i++) {
-			str += "<div>" + data['content'][i] + "</div>";
-		}
-		document.getElementById("modal_title").innerHTML = data['title'];
-		document.getElementById("modal_body").innerHTML = str;
-		$("#large_modal").modal();
-	}
+    function showModal(data) {
+        var str = '';
+        for (var i = 0; i < data['content'].length; i++) {
+            str += "<div>" + data['content'][i] + "</div>";
+        }
+        document.getElementById("modal_title").innerHTML = data['title'];
+        document.getElementById("modal_body").innerHTML = str;
+        $("#large_modal").modal();
+    }
 </script>
 
 {% endblock %}
