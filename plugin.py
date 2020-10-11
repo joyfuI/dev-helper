@@ -62,6 +62,7 @@ def first_menu(sub):
         if sub == 'info':
             arg['path_app_root'] = path_app_root
             arg['path_data'] = path_data
+            arg['config'] = Logic.get_app_config()
             arg['platform'] = Logic.get_platform()
             arg['sys'] = Logic.get_sys()
             return render_template('%s_%s.html' % (package_name, sub), arg=arg)
@@ -71,7 +72,7 @@ def first_menu(sub):
             return render_template('%s_%s.html' % (package_name, sub), arg=arg)
 
         elif sub == 'db':
-            return redirect('/%s/%s/app.config' % (package_name, sub))
+            return redirect('/%s/%s/sjva' % (package_name, sub))
 
         elif sub == 'log':
             return redirect('/%s/%s/framework' % (package_name, sub))
@@ -95,17 +96,14 @@ def second_menu(sub, sub2):
 
         if sub == 'db':
             arg['dbs'] = Logic.get_db_list()
-            if sub2 == 'app.config':
-                arg['config'] = Logic.get_app_config().split('\n')
-                return render_template('%s_%s_app.html' % (package_name, sub), arg=arg)
-            elif sub2 in arg['dbs']:
-                arg['plugin'] = sub2
+            if sub2 in arg['dbs']:
+                arg['db'] = sub2
                 return render_template('%s_%s.html' % (package_name, sub), arg=arg)
 
         elif sub == 'log':
             arg['logs'] = Logic.get_log_list()
             if sub2 in arg['logs']:
-                arg['plugin'] = sub2
+                arg['log'] = sub2
                 return render_template('%s_%s.html' % (package_name, sub), arg=arg)
     except Exception as e:
         logger.error('Exception:%s', e)

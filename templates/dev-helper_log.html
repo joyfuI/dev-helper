@@ -1,107 +1,106 @@
 {% extends "base.html" %}
 {% block content %}
 
-<ul class="nav nav-pills bg-light shadow text-dark">
-    {% for i in arg['logs'] %}
-        {% if i == arg['plugin'] %}
-            <li class="nav-item"><a class="nav-link active" href="./{{ i }}">{{ i }}</a></li>
-        {% else %}
-            <li class="nav-item"><a class="nav-link" href="./{{ i }}">{{ i }}</a></li>
-        {% endif %}
-    {% endfor %}
-</ul>
-<div class="d-inline-block"></div>
+    <ul class="nav nav-pills bg-light shadow text-dark">
+        {% for i in arg['logs'] %}
+            {% if i == arg['log'] %}
+                <li class="nav-item"><a class="nav-link active" href="./{{ i }}">{{ i }}</a></li>
+            {% else %}
+                <li class="nav-item"><a class="nav-link" href="./{{ i }}">{{ i }}</a></li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+    <div class="d-inline-block"></div>
 
-<div>
-    <nav>
-        {{ macros.m_tab_head_start() }}
-        {{ macros.m_tab_head('이전', true) }}
-        {{ macros.m_tab_head('실시간', false) }}
-        {{ macros.m_tab_head_end() }}
-    </nav>
-    <div class="tab-content" id="nav-tabContent">
-        {{ macros.m_tab_content_start('이전', true) }}
-        <div>
-            <textarea id="log" class="col-md-12" rows="30"></textarea>
-        </div>
+    <div>
+        <nav>
+            {{ macros.m_tab_head_start() }}
+            {{ macros.m_tab_head('이전', true) }}
+            {{ macros.m_tab_head('실시간', false) }}
+            {{ macros.m_tab_head_end() }}
+        </nav>
+        <div class="tab-content" id="nav-tabContent">
+            {{ macros.m_tab_content_start('이전', true) }}
+            <div>
+                <textarea id="log" class="col-md-12" rows="30"></textarea>
+            </div>
 
-        <div class="form-inline">
-            <span class="text-left" style="padding-top: 0">
-                <button id="delete" class="btn btn-sm btn-outline-success">로그파일 삭제</button>
-            </span>
-        </div>
-        {{ macros.m_tab_content_end() }}
+            <div class="form-inline">
+                <span class="text-left" style="padding-top: 0">
+                    <button id="delete" class="btn btn-sm btn-outline-success">로그파일 삭제</button>
+                </span>
+            </div>
+            {{ macros.m_tab_content_end() }}
 
-        {{ macros.m_tab_content_start('실시간', false) }}
-        <div>
-            <textarea id="add" class="col-md-12" rows="30"></textarea>
-        </div>
+            {{ macros.m_tab_content_start('실시간', false) }}
+            <div>
+                <textarea id="add" class="col-md-12" rows="30"></textarea>
+            </div>
 
-        <div class="form-inline">
-            <label class="form-check-label" for="auto_scroll">자동 스크롤</label>
-            <input id="auto_scroll" name="auto_scroll" class="form-control form-control-sm" type="checkbox"
-                   data-toggle="toggle" checked>
-            <span class="text-left" style="padding-left: 25px; padding-top: 0">
-                <button id="clear" class="btn btn-sm btn-outline-success">리셋</button>
-            </span>
+            <div class="form-inline">
+                <label class="form-check-label" for="auto_scroll">자동 스크롤</label>
+                <input id="auto_scroll" name="auto_scroll" class="form-control form-control-sm" type="checkbox" data-toggle="toggle" checked>
+                <span class="text-left" style="padding-left: 25px; padding-top: 0">
+                    <button id="clear" class="btn btn-sm btn-outline-success">리셋</button>
+                </span>
+            </div>
+            {{ macros.m_tab_content_end() }}
         </div>
-        {{ macros.m_tab_content_end() }}
     </div>
-</div>
 
-<script>
-    $(function () {
-        "use strict";
-        const package_name = '{{ arg["package_name"] }}';
+    <script>
+        $(function () {
+            "use strict";
+            const package_name = '{{ arg["package_name"] }}';
 
-        $('#loading').show();
-        let socket = io.connect(`${location.origin}/log`);
+            $('#loading').show();
+            let socket = io.connect(`${location.origin}/log`);
 
-        $(window).resize(function () {
-            let clientHeight = innerHeight - $('.container > div:nth-child(2) > ul:nth-child(1)').height() - 260;
-            $('#log').height(clientHeight);
-            $('#add').height(clientHeight);
-        }).resize();
+            $(window).resize(function () {
+                let clientHeight = innerHeight - document.querySelector('.container > div:nth-child(2) > ul:nth-child(1)').clientHeight - 260;
+                $('#log').height(clientHeight);
+                $('#add').height(clientHeight);
+            }).resize();
 
-        socket.emit('start', {
-            'package': '{{ arg["plugin"] }}'
-        });
-
-        socket.on('on_start', function (data) {
-            let log = $('#log');
-            log.html(log.html() + data.data);
-            log.scrollTop(log.prop('scrollHeight'));
-            $('#loading').hide();
-        });
-
-        socket.on('add', function (data) {
-            if (data.package === '{{ arg["plugin"] }}') {
-                let add = $('#add');
-                add.html(add.html() + data.data);
-                if ($('#auto_scroll').prop('checked')) {
-                    add.scrollTop(add.prop('scrollHeight'));
-                }
-            }
-        });
-
-        $('#clear').click(function () {
-            $('#add').val('');
-            return false;
-        });
-
-        $('#delete').click(function () {
-            $.ajax({
-                url: `/${package_name}/ajax/delete`,
-                type: 'POST',
-                cache: false,
-                data: {
-                    log: '{{ arg["plugin"] }}'
-                },
-                dataType: 'json'
+            socket.emit('start', {
+                'package': '{{ arg["log"] }}'
             });
-            return false;
+
+            socket.on('on_start', function (data) {
+                let log = document.getElementById('log');
+                log.value += data.data;
+                log.scrollTop = log.scrollHeight;
+                $('#loading').hide();
+            });
+
+            socket.on('add', function (data) {
+                if (data.package === '{{ arg["log"] }}') {
+                    let add = document.getElementById('add');
+                    add.value += data.data;
+                    if (document.getElementById('auto_scroll').checked) {
+                        add.scrollTop = add.scrollHeight;
+                    }
+                }
+            });
+
+            $('#clear').click(function () {
+                document.getElementById('add').value = '';
+                return false;
+            });
+
+            $('#delete').click(function () {
+                $.ajax({
+                    url: `/${package_name}/ajax/delete`,
+                    type: 'POST',
+                    cache: false,
+                    data: {
+                        log: '{{ arg["log"] }}'
+                    },
+                    dataType: 'json'
+                });
+                return false;
+            });
         });
-    });
-</script>
+    </script>
 
 {% endblock %}

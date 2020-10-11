@@ -53,6 +53,21 @@ class Logic(object):
 #########################################################
 
     @staticmethod
+    def get_app_config():
+        try:
+            config = {}
+            for key, value in app.config.items():
+                config[key] = value
+            del config['SECRET_KEY']    # 해당 키가 있으면 보이지 않고 오류 발생.. 무슨 마법이지;
+            config = json.dumps(config, sort_keys=True, indent=4, default=lambda x: str(x))
+            config = config.replace('\n', '<br>').replace('  ', '&nbsp;&nbsp;')
+            return config
+        except Exception as e:
+            logger.error('Exception:%s', e)
+            logger.error(traceback.format_exc())
+            return ''
+
+    @staticmethod
     def get_platform():
         try:
             platform_list = []
@@ -143,20 +158,6 @@ class Logic(object):
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())
             return []
-
-    @staticmethod
-    def get_app_config():
-        try:
-            config = {}
-            for key, value in app.config.items():
-                config[key] = value
-            del config['SECRET_KEY']    # 해당 키가 있으면 보이지 않고 오류 발생.. 무슨 마법이지;
-            config = json.dumps(config, sort_keys=True, indent=4, default=lambda x: str(x))
-            return config
-        except Exception as e:
-            logger.error('Exception:%s', e)
-            logger.error(traceback.format_exc())
-            return ''
 
     @staticmethod
     def get_db_dict(file):
