@@ -10,11 +10,9 @@ from flask_login import login_required
 
 # sjva 공용
 from framework import path_app_root, path_data
-from framework.logger import get_logger
 
 # 패키지
 package_name = __name__.split('.')[0]
-logger = get_logger(package_name)
 from .logic import Logic
 
 #########################################################
@@ -84,8 +82,8 @@ def first_menu(sub):
         elif sub == 'macro':
             return render_template('%s_%s.html' % (package_name, sub), arg=arg)
     except Exception as e:
-        logger.error('Exception:%s', e)
-        logger.error(traceback.format_exc())
+        print('Exception:%s', e)
+        print(traceback.format_exc())
     return render_template('sample.html', title='%s - %s' % (package_name, sub))
 
 @blueprint.route('/<sub>/<sub2>')
@@ -98,6 +96,8 @@ def second_menu(sub, sub2):
             arg['dbs'] = Logic.get_db_list()
             if sub2 in arg['dbs']:
                 arg['db'] = sub2
+                arg['tables'], arg['cols'] = Logic.get_db_dict(sub2)
+                arg['first_table'] = arg['tables'].keys()[0]
                 return render_template('%s_%s.html' % (package_name, sub), arg=arg)
 
         elif sub == 'log':
@@ -106,8 +106,8 @@ def second_menu(sub, sub2):
                 arg['log'] = sub2
                 return render_template('%s_%s.html' % (package_name, sub), arg=arg)
     except Exception as e:
-        logger.error('Exception:%s', e)
-        logger.error(traceback.format_exc())
+        print('Exception:%s', e)
+        print(traceback.format_exc())
     return render_template('sample.html', title='%s - %s - %s' % (package_name, sub, sub2))
 
 #########################################################
@@ -116,7 +116,7 @@ def second_menu(sub, sub2):
 @blueprint.route('/ajax/<sub>', methods=['POST'])
 @login_required
 def ajax(sub):
-    logger.debug('AJAX %s %s', package_name, sub)
+    print('AJAX %s %s', package_name, sub)
     try:
         if sub == 'install':
             name = request.form['name']
@@ -146,5 +146,5 @@ def ajax(sub):
             ret = Logic.ffmpeg_update(type, name)
             return jsonify(ret)
     except Exception as e:
-        logger.error('Exception:%s', e)
-        logger.error(traceback.format_exc())
+        print('Exception:%s', e)
+        print(traceback.format_exc())

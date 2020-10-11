@@ -11,44 +11,27 @@ import shutil
 import urllib2
 import json
 from threading import Thread
+import sqlite3
+from collections import OrderedDict
 
 # third-party
 import lxml.html
-from sqlitedict import SqliteDict
 
-# sjva 공용
+# sjva 공용, 패키지
 from framework import path_data, app, celery
 from framework.util import Util
-
-# 패키지
-from .plugin import logger, package_name
 #########################################################
 
 class Logic(object):
     @staticmethod
     def plugin_load():
-        try:
-            logger.debug('%s plugin_load', package_name)
-
-            if platform.system() == 'Windows':  # 윈도우일 때
-                pass
-            else:
-                pass
-
-            # 편의를 위해 json 파일 생성
-            from plugin import plugin_info
-            Util.save_from_dict_to_json(plugin_info, os.path.join(os.path.dirname(__file__), 'info.json'))
-        except Exception as e:
-            logger.error('Exception:%s', e)
-            logger.error(traceback.format_exc())
+        # 편의를 위해 json 파일 생성
+        from plugin import plugin_info
+        Util.save_from_dict_to_json(plugin_info, os.path.join(os.path.dirname(__file__), 'info.json'))
 
     @staticmethod
     def plugin_unload():
-        try:
-            logger.debug('%s plugin_unload', package_name)
-        except Exception as e:
-            logger.error('Exception:%s', e)
-            logger.error(traceback.format_exc())
+        pass
 
 #########################################################
 
@@ -63,8 +46,8 @@ class Logic(object):
             config = config.replace('\n', '<br>').replace('  ', '&nbsp;&nbsp;')
             return config
         except Exception as e:
-            logger.error('Exception:%s', e)
-            logger.error(traceback.format_exc())
+            print('Exception:%s', e)
+            print(traceback.format_exc())
             return ''
 
     @staticmethod
@@ -88,8 +71,8 @@ class Logic(object):
             platform_list.append(['platform.uname()', platform.uname()])
             return platform_list
         except Exception as e:
-            logger.error('Exception:%s', e)
-            logger.error(traceback.format_exc())
+            print('Exception:%s', e)
+            print(traceback.format_exc())
             return []
 
     @staticmethod
@@ -102,48 +85,47 @@ class Logic(object):
             sys_list.append(['sys.platform', sys.platform])
             return sys_list
         except Exception as e:
-            logger.error('Exception:%s', e)
-            logger.error(traceback.format_exc())
+            print('Exception:%s', e)
+            print(traceback.format_exc())
             return []
 
     @staticmethod
     def get_package_list():
         try:
-            logger.debug('pip list')
             output = subprocess.check_output([sys.executable, '-m', 'pip', 'list'], universal_newlines=True).rstrip()
             packages = []
             for i in output.split('\n')[2:]:
                 packages.append(i.strip().split())
             return packages
         except Exception as e:
-            logger.error('Exception:%s', e)
-            logger.error(traceback.format_exc())
+            print('Exception:%s', e)
+            print(traceback.format_exc())
             return []
 
     @staticmethod
     def py_package_install(name):
         try:
-            logger.debug('pip install --upgrade %s', name)
+            print('pip install --upgrade %s', name)
             output = subprocess.check_output([sys.executable, '-m', 'pip', 'install', '--upgrade', name],
                                              universal_newlines=True).rstrip()
-            logger.debug(output)
+            print(output)
             return output
         except Exception as e:
-            logger.error('Exception:%s', e)
-            logger.error(traceback.format_exc())
+            print('Exception:%s', e)
+            print(traceback.format_exc())
             return ''
 
     @staticmethod
     def py_package_uninstall(name):
         try:
-            logger.debug('pip uninstall -y %s', name)
+            print('pip uninstall -y %s', name)
             output = subprocess.check_output([sys.executable, '-m', 'pip', 'uninstall', '-y', name],
                                              universal_newlines=True).rstrip()
-            logger.debug(output)
+            print(output)
             return output
         except Exception as e:
-            logger.error('Exception:%s', e)
-            logger.error(traceback.format_exc())
+            print('Exception:%s', e)
+            print(traceback.format_exc())
             return ''
 
     @staticmethod
@@ -155,23 +137,39 @@ class Logic(object):
             dbs.sort()
             return dbs
         except Exception as e:
-            logger.error('Exception:%s', e)
-            logger.error(traceback.format_exc())
+            print('Exception:%s', e)
+            print(traceback.format_exc())
             return []
 
     @staticmethod
-    def get_db_dict(file):
+    def get_db_dict(name):
         try:
-            mydict = {}
-            with SqliteDict(file, 'youtube-dl_setting') as sqldict:
-                for key, value in sqldict.iteritems():
-                    logger.debug('key: %s, value: %s' % (key, value))
-                    mydict[key] = value
-            logger.debug(mydict)
-            return mydict
+            db_dict = {}
+            db_attr = {}
+            connect = sqlite3.connect(os.path.join(path_data, 'db', '%s.db' % name))
+            cursor = connect.cursor()
+
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+            tables = [table[0] for table in cursor.fetchall()]
+            for table in tables:
+                cursor.execute("SELECT * FROM '%s'" % table)
+                rows = cursor.fetchall()
+                cols = [col[0] for col in cursor.description]
+                db_attr[table] = cols
+
+                tuples = []
+                for row in rows:
+                    tuple = OrderedDict()
+                    for col in cols:
+                        tuple[col] = row[cols.index(col)]
+                    tuples.append(tuple)
+                db_dict[table] = tuples
+
+            connect.close()
+            return db_dict, db_attr
         except Exception as e:
-            logger.error('Exception:%s', e)
-            logger.error(traceback.format_exc())
+            print('Exception:%s', e)
+            print(traceback.format_exc())
             return {}
 
     @staticmethod
@@ -183,19 +181,18 @@ class Logic(object):
             logs.sort()
             return logs
         except Exception as e:
-            logger.error('Exception:%s', e)
-            logger.error(traceback.format_exc())
+            print('Exception:%s', e)
+            print(traceback.format_exc())
             return []
 
     @staticmethod
     def log_delete(log):
         try:
             for i in glob.glob(os.path.join(path_data, 'log', log + '.log*')):
-                logger.debug('Delete: %s', i)
                 os.remove(i)
         except Exception as e:
-            logger.error('Exception:%s', e)
-            logger.error(traceback.format_exc())
+            print('Exception:%s', e)
+            print(traceback.format_exc())
 
     @staticmethod
     def get_ffmpeg_new():
@@ -206,8 +203,8 @@ class Logic(object):
             release = root.xpath('//table/tr[1]/th[2]/text()')[0][9:]
             return git_master, release
         except Exception as e:
-            logger.error('Exception:%s', e)
-            logger.error(traceback.format_exc())
+            print('Exception:%s', e)
+            print(traceback.format_exc())
             return '', ''
 
     @staticmethod
@@ -221,7 +218,6 @@ class Logic(object):
                     url = 'https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz'
                     dir = 'ffmpeg-' + name + '-amd64-static'
                 else:
-                    logger.error('잘못된 타입: ', type)
                     return {'success': False, 'message': '잘못된 타입'}
                 args = (url, dir)
                 if app.config['config']['use_celery']:
@@ -229,37 +225,36 @@ class Logic(object):
                 else:
                     Thread(target=Logic.ffmpeg_download, args=args).start()
             else:
-                logger.error('지원하지 않는 시스템')
                 return {'success': False, 'message': '지원하지 않는 시스템'}
             return {'success': True}
         except Exception as e:
-            logger.error('Exception:%s', e)
-            logger.error(traceback.format_exc())
+            print('Exception:%s', e)
+            print(traceback.format_exc())
             return {'success': False, 'message': e}
 
     @staticmethod
     @celery.task
     def ffmpeg_download(url, dir):
         filename = os.path.join(path_data, 'download_tmp', 'ffmpeg-amd64-static.tar.xz')
-        logger.debug(url)
         response = urllib2.urlopen(url)
         with open(filename, 'wb') as f:
             f.write(response.read())    # 다운로드
         # 아 zx 압축해제가 파이썬 3.3부터 지원하넹...
+        print('tar xvfJ %s -C %s' % (filename, os.path.join(path_data, 'download_tmp')))
         output = subprocess.check_output(['tar', 'xvfJ', filename, '-C', os.path.join(path_data, 'download_tmp')],
                                          universal_newlines=True)
-        logger.debug(output)
+        print(output)
         # 덮어쓰기
-        # logger.debug('mv %s %s' % (os.path.join(path_data, 'download_tmp', dir, 'ffmpeg'), '/usr/bin/ffmpeg'))
+        # print('mv %s %s' % (os.path.join(path_data, 'download_tmp', dir, 'ffmpeg'), '/usr/bin/ffmpeg'))
         # shutil.move(os.path.join(path_data, 'download_tmp', dir, 'ffmpeg'), '/usr/bin/ffmpeg')
-        # logger.debug('mv %s %s' % (os.path.join(path_data, 'download_tmp', dir, 'ffprobe'), '/usr/bin/ffprobe'))
+        # print('mv %s %s' % (os.path.join(path_data, 'download_tmp', dir, 'ffprobe'), '/usr/bin/ffprobe'))
         # shutil.move(os.path.join(path_data, 'download_tmp', dir, 'ffprobe'), '/usr/bin/ffprobe')
-        # logger.debug('mv %s %s' % (os.path.join(path_data, 'download_tmp', dir, 'qt-faststart'), '/usr/bin/qt-faststart'))
+        # print('mv %s %s' % (os.path.join(path_data, 'download_tmp', dir, 'qt-faststart'), '/usr/bin/qt-faststart'))
         # shutil.move(os.path.join(path_data, 'download_tmp', dir, 'qt-faststart'), '/usr/bin/qt-faststart')
-        logger.debug('mv %s %s' % (os.path.join(path_data, 'download_tmp', dir, 'ffmpeg'), os.path.join(path_data, 'download', 'ffmpeg')))
+        print('mv %s %s' % (os.path.join(path_data, 'download_tmp', dir, 'ffmpeg'), os.path.join(path_data, 'download', 'ffmpeg')))
         shutil.move(os.path.join(path_data, 'download_tmp', dir, 'ffmpeg'), os.path.join(path_data, 'download', 'ffmpeg'))
         # 다운로드 삭제
-        logger.debug('rm %s' % filename)
+        print('rm %s' % filename)
         os.remove(filename)
-        logger.debug('rm -r %s' % os.path.join(path_data, 'download_tmp', dir))
+        print('rm -r %s' % os.path.join(path_data, 'download_tmp', dir))
         shutil.rmtree(os.path.join(path_data, 'download_tmp', dir))

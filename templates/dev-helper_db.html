@@ -3,19 +3,43 @@
 
     <ul class="nav nav-pills bg-light shadow text-dark">
         {% for i in arg['dbs'] %}
-            {% if i == arg['db'] %}
-                <li class="nav-item"><a class="nav-link active" href="./{{ i }}">{{ i }}</a></li>
-            {% else %}
-                <li class="nav-item"><a class="nav-link" href="./{{ i }}">{{ i }}</a></li>
-            {% endif %}
+            <li class="nav-item"><a class="nav-link {{ 'active' if i == arg['db'] else '' }}" href="./{{ i }}">{{ i }}</a></li>
         {% endfor %}
     </ul>
     <div class="d-inline-block"></div>
 
     <div>
-        {% for i in arg['config'] %}
-            <div>{{ i.replace('  ', '&nbsp;&nbsp;')|safe }}</div>
-        {% endfor %}
+        <nav>
+            {{ macros.m_tab_head_start() }}
+            {% for i in arg['tables'].keys() %}
+                {{ macros.m_tab_head(i, i == arg['first_table']) }}
+            {% endfor %}
+            {{ macros.m_tab_head_end() }}
+        </nav>
+        <div class="tab-content" id="nav-tabContent">
+            {% for i in arg['tables'].keys() %}
+                {{ macros.m_tab_content_start(i, i == arg['first_table']) }}
+                <table class="table">
+                    <thead>
+                        <tr>
+                            {% for j in arg['cols'][i] %}
+                                <th scope="col">{{ j }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for j in arg['tables'][i] %}
+                            <tr>
+                                {% for k in j.values() %}
+                                    <td>{{ k }}</td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {{ macros.m_tab_content_end() }}
+            {% endfor %}
+        </div>
     </div>
 
     <script>
