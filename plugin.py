@@ -97,7 +97,7 @@ def second_menu(sub, sub2):
             if sub2 in arg['dbs']:
                 arg['db'] = sub2
                 arg['tables'], arg['cols'] = Logic.get_db_dict(sub2)
-                arg['first_table'] = arg['tables'].keys()[0]
+                arg['first_table'] = list(arg['tables'].keys())[0]
                 return render_template('%s_%s.html' % (package_name, sub), arg=arg)
 
         elif sub == 'log':

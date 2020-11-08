@@ -8,7 +8,7 @@ import traceback
 import platform
 import glob
 import shutil
-import urllib2
+import requests
 import json
 from threading import Thread
 import sqlite3
@@ -26,7 +26,7 @@ class Logic(object):
     @staticmethod
     def plugin_load():
         # 편의를 위해 json 파일 생성
-        from plugin import plugin_info
+        from .plugin import plugin_info
         Util.save_from_dict_to_json(plugin_info, os.path.join(os.path.dirname(__file__), 'info.json'))
 
     @staticmethod
@@ -197,7 +197,7 @@ class Logic(object):
     @staticmethod
     def get_ffmpeg_new():
         try:
-            html = urllib2.urlopen('https://johnvansickle.com/ffmpeg/').read()
+            html = requests.get('https://johnvansickle.com/ffmpeg/', allow_redirects=True).text
             root = lxml.html.fromstring(html)
             git_master = root.xpath('//table/tr[1]/th[1]/text()')[0][21:]
             release = root.xpath('//table/tr[1]/th[2]/text()')[0][9:]
@@ -236,9 +236,9 @@ class Logic(object):
     @celery.task
     def ffmpeg_download(url, dir):
         filename = os.path.join(path_data, 'download_tmp', 'ffmpeg-amd64-static.tar.xz')
-        response = urllib2.urlopen(url)
+        response = requests.get(url, allow_redirects=True)
         with open(filename, 'wb') as f:
-            f.write(response.read())    # 다운로드
+            f.write(response.content)    # 다운로드
         # 아 zx 압축해제가 파이썬 3.3부터 지원하넹...
         print('tar xvfJ %s -C %s' % (filename, os.path.join(path_data, 'download_tmp')))
         output = subprocess.check_output(['tar', 'xvfJ', filename, '-C', os.path.join(path_data, 'download_tmp')],
