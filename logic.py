@@ -152,7 +152,8 @@ class Logic(object):
             cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
             tables = [table[0] for table in cursor.fetchall()]
             for table in tables:
-                cursor.execute("SELECT * FROM '%s'" % table)
+                # 페이지네이션으로 처리하고 싶지만 귀찮아서 일단 500개로 제한
+                cursor.execute("SELECT * FROM '%s' LIMIT 500" % table)
                 rows = cursor.fetchall()
                 cols = [col[0] for col in cursor.description]
                 db_attr[table] = cols
