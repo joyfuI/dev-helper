@@ -8,13 +8,13 @@ import traceback
 import platform
 import glob
 import shutil
-import requests
 import json
 from threading import Thread
 import sqlite3
 from collections import OrderedDict
 
 # third-party
+import requests
 import lxml.html
 
 # sjva 공용, 패키지
