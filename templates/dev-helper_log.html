@@ -15,30 +15,26 @@
             {{ macros.m_tab_head2('real_tab', '실시간', false) }}
             {{ macros.m_tab_head_end() }}
         </nav>
-        <div class="tab-content" id="nav-tabContent">
+        <div class="tab-content">
             {{ macros.m_tab_content_start('log_tab', true) }}
             <div>
-                <textarea id="log" class="col-md-12" rows="30"></textarea>
+                <textarea id="log_textarea" class="col-md-12" rows="30"></textarea>
             </div>
 
             <div class="form-inline">
-                <span class="text-left" style="padding-top: 0">
-                    <button id="delete" class="btn btn-sm btn-outline-success">로그파일 삭제</button>
-                </span>
+                <button id="delete_button" class="btn btn-sm btn-outline-success">로그파일 삭제</button>
             </div>
             {{ macros.m_tab_content_end() }}
 
             {{ macros.m_tab_content_start('real_tab', false) }}
             <div>
-                <textarea id="add" class="col-md-12" rows="30"></textarea>
+                <textarea id="add_textarea" class="col-md-12" rows="30"></textarea>
             </div>
 
             <div class="form-inline">
                 <label class="form-check-label" for="auto_scroll">자동 스크롤</label>
                 <input id="auto_scroll" name="auto_scroll" class="form-control form-control-sm" type="checkbox" data-toggle="toggle" checked>
-                <span class="text-left" style="padding-left: 25px; padding-top: 0">
-                    <button id="clear" class="btn btn-sm btn-outline-success">리셋</button>
-                </span>
+                <button id="clear_button" class="btn btn-sm btn-outline-success ml-5">리셋</button>
             </div>
             {{ macros.m_tab_content_end() }}
         </div>
@@ -48,53 +44,45 @@
         "use strict";
         const package_name = '{{ arg["package_name"] }}';
 
-        $(function () {
-            $('#loading').show();
-            let socket = io.connect(`${location.origin}/log`);
+        const socket = io.connect(`${location.origin}/log`);
+        socket.emit('start', {
+            'package': '{{ arg["log"] }}'
+        });
 
-            $(window).resize(function () {
-                let clientHeight = innerHeight - document.querySelector('.container > div:nth-child(2) > ul:nth-child(1)').clientHeight - 260;
-                $('#log').height(clientHeight);
-                $('#add').height(clientHeight);
-            }).resize();
+        socket.on('on_start', (data) => {
+            const log_textarea = document.getElementById('log_textarea');
+            log_textarea.value += data.data;
+            log_textarea.scrollTop = log_textarea.scrollHeight;
+        });
 
-            socket.emit('start', {
-                'package': '{{ arg["log"] }}'
-            });
-
-            socket.on('on_start', function (data) {
-                let log = document.getElementById('log');
-                log.value += data.data;
-                log.scrollTop = log.scrollHeight;
-                $('#loading').hide();
-            });
-
-            socket.on('add', function (data) {
-                if (data.package === '{{ arg["log"] }}') {
-                    let add = document.getElementById('add');
-                    add.value += data.data;
-                    if (document.getElementById('auto_scroll').checked) {
-                        add.scrollTop = add.scrollHeight;
-                    }
+        socket.on('add', (data) => {
+            if (data.package === '{{ arg["log"] }}') {
+                const add_textarea = document.getElementById('add_textarea');
+                add_textarea.value += data.data;
+                if (document.getElementById('auto_scroll').checked) {
+                    add_textarea.scrollTop = add_textarea.scrollHeight;
                 }
-            });
+            }
+        });
 
-            $('#clear').click(function () {
-                document.getElementById('add').value = '';
-                return false;
-            });
+        const clear_button = document.getElementById('clear_button');
+        clear_button.addEventListener('click', (event) => {
+            event.preventDefault();
+            document.getElementById('add_textarea').value = '';
+        });
 
-            $('#delete').click(function () {
-                $.ajax({
-                    url: `/${package_name}/ajax/delete`,
-                    type: 'POST',
-                    cache: false,
-                    data: {
-                        log: '{{ arg["log"] }}'
-                    },
-                    dataType: 'json'
-                });
-                return false;
+        const delete_button = document.getElementById('delete_button');
+        delete_button.addEventListener('click', (event) => {
+            event.preventDefault();
+            fetch(`/${package_name}/ajax/delete`, {
+                method: 'POST',
+                cache: 'no-cache',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                },
+                body: new URLSearchParams({
+                    log: '{{ arg["log"] }}'
+                })
             });
         });
     </script>

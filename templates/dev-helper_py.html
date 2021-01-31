@@ -2,11 +2,11 @@
 {% block content %}
 
     <div>
-        {{ macros.setting_input_text_and_buttons('package', '설치할 패키지명', [['install_btn', '설치']]) }}
+        {{ macros.setting_input_text_and_buttons('package_text', '설치할 패키지명', [['install_button', '설치']]) }}
         {{ macros.m_hr() }}
-        <div id="list">
+        <div id="list_div">
             {% for i in arg['packages'] %}
-                {{ macros.info_text_and_buttons(i[0], i[0], [[i[0] + '_ver', i[1]], [i[0] + '_upgrade', '업데이트'], [i[0] + '_uninstall', '제거']]) }}
+                {{ macros.info_text_and_buttons(i[0] + '_text', i[0], [[i[0] + '_button', i[1]], [i[0] + '_upgrade', '업데이트'], [i[0] + '_uninstall', '제거']]) }}
             {% endfor %}
         </div>
     </div>
@@ -15,65 +15,70 @@
         "use strict";
         const package_name = '{{ arg["package_name"] }}';
 
-        $(function () {
-            // 패키지 설치
-            $('#install_btn').click(function () {
-                let name = document.getElementById('package').value;
-                if (name === '') {
-                    $.notify('<strong>패키지명을 입력하세요.</strong>', {
-                        type: 'warning'
-                    });
-                    return;
-                }
-                $.ajax({
-                    url: `/${package_name}/ajax/install`,
-                    type: 'POST',
-                    cache: false,
-                    data: {
-                        name: name
-                    },
-                    dataType: 'json'
-                }).done(showModal);
-                return false;
-            });
+        // 패키지 설치
+        const install_button = document.getElementById('install_button');
+        install_button.addEventListener('click', (event) => {
+            event.preventDefault();
+            const name = document.getElementById('package_text').value;
+            if (name === '') {
+                notify('패키지명을 입력하세요.', 'warning');
+                return;
+            }
+            fetch(`/${package_name}/ajax/install`, {
+                method: 'POST',
+                cache: 'no-cache',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                },
+                body: new URLSearchParams({
+                    name: name
+                })
+            }).then((response) => response.json()).then(showModal);
+        });
 
-            // 패키지 업데이트/제거
-            $('#list').on('click', 'button', function () {
-                let name = this.id;
-                switch (this.textContent) {
-                    case '업데이트':
-                        name = name.replace(/_upgrade$/, '');
-                        $.ajax({
-                            url: `/${package_name}/ajax/install`,
-                            type: 'POST',
-                            cache: false,
-                            data: {
-                                name: name
-                            },
-                            dataType: 'json'
-                        }).done(showModal);
-                        break;
+        // 패키지 업데이트/제거
+        const list_div = document.getElementById('list_div');
+        list_div.addEventListener('click', (event) => {
+            event.preventDefault();
+            const target = event.target;
+            if (target.tagName !== 'BUTTON') {
+                return;
+            }
+            let name = target.id;
+            switch (target.textContent) {
+                case '업데이트':
+                    name = name.replace(/_upgrade$/, '');
+                    fetch(`/${package_name}/ajax/install`, {
+                        method: 'POST',
+                        cache: 'no-cache',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                        },
+                        body: new URLSearchParams({
+                            name: name
+                        })
+                    }).then((response) => response.json()).then(showModal);
+                    break;
 
-                    case '제거':
-                        name = name.replace(/_uninstall$/, '');
-                        $.ajax({
-                            url: `/${package_name}/ajax/uninstall`,
-                            type: 'POST',
-                            cache: false,
-                            data: {
-                                name: name
-                            },
-                            dataType: 'json'
-                        }).done(showModal);
-                        break;
-                }
-                return false;
-            });
+                case '제거':
+                    name = name.replace(/_uninstall$/, '');
+                    fetch(`/${package_name}/ajax/uninstall`, {
+                        method: 'POST',
+                        cache: 'no-cache',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                        },
+                        body: new URLSearchParams({
+                            name: name
+                        })
+                    }).then((response) => response.json()).then(showModal);
+                    break;
+            }
         });
 
         function showModal(data) {
             let str = '';
-            for (let i of data['content']) {
+            for (const i of data['content']) {
                 str += `<div>${i}</div>`;
             }
             document.getElementById('modal_title').innerHTML = data['title'];

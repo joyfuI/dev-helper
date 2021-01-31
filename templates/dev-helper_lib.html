@@ -2,74 +2,73 @@
 {% block content %}
 
     <div>
-        {{ macros.info_text_and_buttons('ffmpeg', 'FFmpeg 다운로드', [['ffmpeg_version', '버전확인'], ['ffmpeg_git', 'git master'], ['ffmpeg_release', 'release']], desc=['git master: ' + arg['ffmpeg_git'], 'release: ' + arg['ffmpeg_release']]) }}
+        {{ macros.info_text_and_buttons('ffmpeg_text', 'FFmpeg 다운로드', [['ffmpeg_version_button', '버전확인'], ['ffmpeg_git_button', 'git master'], ['ffmpeg_release_button', 'release']], desc=['git master: ' + arg['ffmpeg_git'], 'release: ' + arg['ffmpeg_release']]) }}
     </div>
 
     <script>
         "use strict";
         const package_name = '{{ arg["package_name"] }}';
 
-        const ffmpeg_git = '{{ arg["ffmpeg_git"] }}', ffmpeg_release = '{{ arg["ffmpeg_release"] }}';
-
-        $(function () {
-            // FFmpeg 버전확인
-            $('#ffmpeg_version').click(function () {
-                $.ajax({
-                    url: '/ffmpeg/ajax/ffmpeg_version',
-                    type: 'POST',
-                    cache: false,
-                    data: {},
-                    dataType: 'json'
-                }).done(function (data) {
-                    let str = '';
-                    for (let i of data) {
-                        str += `<div>${i}</div>`;
-                    }
-                    document.getElementById('modal_title').innerHTML = 'ffmpeg -version';
-                    document.getElementById('modal_body').innerHTML = str;
-                    $('#large_modal').modal();
-                });
-                return false;
-            });
-
-            // FFmpeg 업데이트 (git master)
-            $('#ffmpeg_git').click(function () {
-                $.ajax({
-                    url: `/${package_name}/ajax/ffmpeg`,
-                    type: 'POST',
-                    cache: false,
-                    data: {
-                        type: 'git',
-                        name: ffmpeg_git
-                    },
-                    dataType: 'json'
-                }).done(success);
-                return false;
-            });
-
-            // FFmpeg 업데이트 (release)
-            $('#ffmpeg_release').click(function () {
-                $.ajax({
-                    url: `/${package_name}/ajax/ffmpeg`,
-                    type: 'POST',
-                    cache: false,
-                    data: {
-                        type: 'release',
-                        name: ffmpeg_release
-                    },
-                    dataType: 'json'
-                }).done(success);
-                return false;
-            });
-
-            function success(data) {
-                if (!data.success) {
-                    $.notify(`<strong>${data.message}</strong>`, {
-                        type: 'warning'
-                    });
+        // FFmpeg 버전확인
+        const ffmpeg_version_button = document.getElementById('ffmpeg_version_button');
+        ffmpeg_version_button.addEventListener('click', (event) => {
+            event.preventDefault();
+            fetch('/ffmpeg/ajax/ffmpeg_version', {
+                method: 'POST',
+                cache: 'no-cache',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
                 }
-            }
+            }).then((response) => response.json()).then((data) => {
+                let str = '';
+                for (const i of data) {
+                    str += `<div>${i}</div>`;
+                }
+                document.getElementById('modal_title').innerHTML = 'ffmpeg -version';
+                document.getElementById('modal_body').innerHTML = str;
+                $('#large_modal').modal();
+            });
         });
+
+        // FFmpeg 업데이트 (git master)
+        const ffmpeg_git_button = document.getElementById('ffmpeg_git_button');
+        ffmpeg_git_button.addEventListener('click', (event) => {
+            event.preventDefault();
+            fetch(`/${package_name}/ajax/ffmpeg`, {
+                method: 'POST',
+                cache: 'no-cache',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                },
+                body: new URLSearchParams({
+                    type: 'git',
+                    name: '{{ arg["ffmpeg_git"] }}'
+                })
+            }).then((response) => response.json()).then(success);
+        });
+
+        // FFmpeg 업데이트 (release)
+        const ffmpeg_release_button = document.getElementById('ffmpeg_release_button');
+        ffmpeg_release_button.addEventListener('click', (event) => {
+            event.preventDefault();
+            fetch(`/${package_name}/ajax/ffmpeg`, {
+                method: 'POST',
+                cache: 'no-cache',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                },
+                body: new URLSearchParams({
+                    type: 'release',
+                    name: '{{ arg["ffmpeg_release"] }}'
+                })
+            }).then((response) => response.json()).then(success);
+        });
+
+        function success(data) {
+            if (!data.success) {
+                notify(data.message, 'warning');
+            }
+        }
     </script>
 
 {% endblock %}
