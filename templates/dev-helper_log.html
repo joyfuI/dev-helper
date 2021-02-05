@@ -8,36 +8,34 @@
     </ul>
     <div class="d-inline-block"></div>
 
-    <div>
-        <nav>
-            {{ macros.m_tab_head_start() }}
-            {{ macros.m_tab_head2('log_tab', '이전', true) }}
-            {{ macros.m_tab_head2('real_tab', '실시간', false) }}
-            {{ macros.m_tab_head_end() }}
-        </nav>
-        <div class="tab-content">
-            {{ macros.m_tab_content_start('log_tab', true) }}
-            <div>
-                <textarea id="log_textarea" class="col-md-12" rows="30"></textarea>
-            </div>
-
-            <div class="form-inline">
-                <button id="delete_button" class="btn btn-sm btn-outline-success">로그파일 삭제</button>
-            </div>
-            {{ macros.m_tab_content_end() }}
-
-            {{ macros.m_tab_content_start('real_tab', false) }}
-            <div>
-                <textarea id="add_textarea" class="col-md-12" rows="30"></textarea>
-            </div>
-
-            <div class="form-inline">
-                <label class="form-check-label" for="auto_scroll">자동 스크롤</label>
-                <input id="auto_scroll" name="auto_scroll" class="form-control form-control-sm" type="checkbox" data-toggle="toggle" checked>
-                <button id="clear_button" class="btn btn-sm btn-outline-success ml-5">리셋</button>
-            </div>
-            {{ macros.m_tab_content_end() }}
+    <nav>
+        {{ macros.m_tab_head_start() }}
+        {{ macros.m_tab_head2('log_tab', '이전', true) }}
+        {{ macros.m_tab_head2('real_tab', '실시간', false) }}
+        {{ macros.m_tab_head_end() }}
+    </nav>
+    <div class="tab-content">
+        {{ macros.m_tab_content_start('log_tab', true) }}
+        <div>
+            <textarea id="log_textarea" class="col-md-12" rows="30"></textarea>
         </div>
+
+        <div class="form-inline">
+            {{ macros.m_button('delete_btn', '로그파일 삭제') }}
+        </div>
+        {{ macros.m_tab_content_end() }}
+
+        {{ macros.m_tab_content_start('real_tab', false) }}
+        <div>
+            <textarea id="add_textarea" class="col-md-12" rows="30"></textarea>
+        </div>
+
+        <div class="form-inline">
+            <label class="form-check-label" for="auto_scroll">자동 스크롤</label>
+            <input id="auto_scroll" name="auto_scroll" class="form-control form-control-sm" type="checkbox" data-toggle="toggle" checked>
+            <button id="clear_btn" class="btn btn-sm btn-outline-success ml-5">리셋</button>
+        </div>
+        {{ macros.m_tab_content_end() }}
     </div>
 
     <script>
@@ -65,14 +63,14 @@
             }
         });
 
-        const clear_button = document.getElementById('clear_button');
-        clear_button.addEventListener('click', (event) => {
+        const clear_btn = document.getElementById('clear_btn');
+        clear_btn.addEventListener('click', (event) => {
             event.preventDefault();
             document.getElementById('add_textarea').value = '';
         });
 
-        const delete_button = document.getElementById('delete_button');
-        delete_button.addEventListener('click', (event) => {
+        const delete_btn = document.getElementById('delete_btn');
+        delete_btn.addEventListener('click', (event) => {
             event.preventDefault();
             fetch(`/${package_name}/ajax/delete`, {
                 method: 'POST',

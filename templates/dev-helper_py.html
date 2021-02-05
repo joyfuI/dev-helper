@@ -1,14 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
 
-    <div>
-        {{ macros.setting_input_text_and_buttons('package_text', '설치할 패키지명', [['install_button', '설치']]) }}
-        {{ macros.m_hr() }}
-        <div id="list_div">
-            {% for i in arg['packages'] %}
-                {{ macros.info_text_and_buttons(i[0] + '_text', i[0], [[i[0] + '_button', i[1]], [i[0] + '_upgrade', '업데이트'], [i[0] + '_uninstall', '제거']]) }}
-            {% endfor %}
-        </div>
+    {{ macros.setting_input_text_and_buttons('package', '설치할 패키지명', [['install_btn', '설치']]) }}
+    {{ macros.m_hr() }}
+    <div id="list_div">
+        {% for i in arg['packages'] %}
+            {{ macros.info_text_and_buttons(i[0], i[0], [[i[0] + '_btn', i[1]], [i[0] + '_upgrade', '업데이트'], [i[0] + '_uninstall', '제거']]) }}
+        {% endfor %}
     </div>
 
     <script>
@@ -16,10 +14,10 @@
         const package_name = '{{ arg["package_name"] }}';
 
         // 패키지 설치
-        const install_button = document.getElementById('install_button');
-        install_button.addEventListener('click', (event) => {
+        const install_btn = document.getElementById('install_btn');
+        install_btn.addEventListener('click', (event) => {
             event.preventDefault();
-            const name = document.getElementById('package_text').value;
+            const name = document.getElementById('package').value;
             if (name === '') {
                 notify('패키지명을 입력하세요.', 'warning');
                 return;

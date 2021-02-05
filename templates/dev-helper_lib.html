@@ -1,17 +1,15 @@
 {% extends "base.html" %}
 {% block content %}
 
-    <div>
-        {{ macros.info_text_and_buttons('ffmpeg_text', 'FFmpeg 다운로드', [['ffmpeg_version_button', '버전확인'], ['ffmpeg_git_button', 'git master'], ['ffmpeg_release_button', 'release']], desc=['git master: ' + arg['ffmpeg_git'], 'release: ' + arg['ffmpeg_release']]) }}
-    </div>
+    {{ macros.info_text_and_buttons('ffmpeg_download', 'FFmpeg 다운로드', [['ffmpeg_version_btn', '버전확인'], ['ffmpeg_git_btn', 'git master'], ['ffmpeg_release_btn', 'release']], desc=['git master: ' + arg['ffmpeg_git'], 'release: ' + arg['ffmpeg_release']]) }}
 
     <script>
         "use strict";
         const package_name = '{{ arg["package_name"] }}';
 
         // FFmpeg 버전확인
-        const ffmpeg_version_button = document.getElementById('ffmpeg_version_button');
-        ffmpeg_version_button.addEventListener('click', (event) => {
+        const ffmpeg_version_btn = document.getElementById('ffmpeg_version_btn');
+        ffmpeg_version_btn.addEventListener('click', (event) => {
             event.preventDefault();
             fetch('/ffmpeg/ajax/ffmpeg_version', {
                 method: 'POST',
@@ -31,8 +29,8 @@
         });
 
         // FFmpeg 업데이트 (git master)
-        const ffmpeg_git_button = document.getElementById('ffmpeg_git_button');
-        ffmpeg_git_button.addEventListener('click', (event) => {
+        const ffmpeg_git_btn = document.getElementById('ffmpeg_git_btn');
+        ffmpeg_git_btn.addEventListener('click', (event) => {
             event.preventDefault();
             fetch(`/${package_name}/ajax/ffmpeg`, {
                 method: 'POST',
@@ -48,8 +46,8 @@
         });
 
         // FFmpeg 업데이트 (release)
-        const ffmpeg_release_button = document.getElementById('ffmpeg_release_button');
-        ffmpeg_release_button.addEventListener('click', (event) => {
+        const ffmpeg_release_btn = document.getElementById('ffmpeg_release_btn');
+        ffmpeg_release_btn.addEventListener('click', (event) => {
             event.preventDefault();
             fetch(`/${package_name}/ajax/ffmpeg`, {
                 method: 'POST',
