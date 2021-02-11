@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-#########################################################
 # python
 import os
 import traceback
@@ -18,7 +17,9 @@ from .logic import Logic
 #########################################################
 # 플러그인 공용
 #########################################################
-blueprint = Blueprint(package_name, package_name, url_prefix='/%s' % package_name, template_folder=os.path.join(os.path.dirname(__file__), 'templates'))
+blueprint = Blueprint(package_name, package_name, url_prefix='/%s' % package_name,
+                      template_folder=os.path.join(os.path.dirname(__file__), 'templates'),
+                      static_folder=os.path.join(os.path.dirname(__file__), 'static'))
 
 menu = {
     'main': [package_name, '플러그인 개발'],
@@ -38,11 +39,14 @@ plugin_info = {
     'more': ''
 }
 
+
 def plugin_load():
     Logic.plugin_load()
 
+
 def plugin_unload():
     Logic.plugin_unload()
+
 
 #########################################################
 # WEB Menu
@@ -51,11 +55,15 @@ def plugin_unload():
 def home():
     return redirect('/%s/info' % package_name)
 
+
 @blueprint.route('/<sub>')
 @login_required
 def first_menu(sub):
     try:
-        arg = {'package_name': package_name}
+        arg = {
+            'package_name': package_name,
+            'template_name': '%s_%s' % (package_name, sub)
+        }
 
         if sub == 'info':
             arg['path_app_root'] = path_app_root
@@ -86,11 +94,15 @@ def first_menu(sub):
         print(traceback.format_exc())
     return render_template('sample.html', title='%s - %s' % (package_name, sub))
 
+
 @blueprint.route('/<sub>/<sub2>')
 @login_required
 def second_menu(sub, sub2):
     try:
-        arg = {'package_name': package_name}
+        arg = {
+            'package_name': package_name,
+            'template_name': '%s_%s' % (package_name, sub)
+        }
 
         if sub == 'db':
             arg['dbs'] = Logic.get_db_list()
@@ -109,6 +121,7 @@ def second_menu(sub, sub2):
         print('Exception:%s', e)
         print(traceback.format_exc())
     return render_template('sample.html', title='%s - %s - %s' % (package_name, sub, sub2))
+
 
 #########################################################
 # For UI

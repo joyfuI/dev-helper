@@ -3,7 +3,9 @@
 
     <ul class="nav nav-pills bg-light shadow text-dark">
         {% for i in arg['logs'] %}
-            <li class="nav-item"><a class="nav-link {{ 'active' if i == arg['log'] else '' }}" href="./{{ i }}">{{ i }}</a></li>
+            <li class="nav-item">
+                <a class="nav-link {{ 'active' if i == arg['log'] else '' }}" href="./{{ i }}">{{ i }}</a>
+            </li>
         {% endfor %}
     </ul>
     <div class="d-inline-block"></div>
@@ -32,7 +34,8 @@
 
         <div class="form-inline">
             <label class="form-check-label" for="auto_scroll">자동 스크롤</label>
-            <input id="auto_scroll" name="auto_scroll" class="form-control form-control-sm" type="checkbox" data-toggle="toggle" checked>
+            <input id="auto_scroll" name="auto_scroll" class="form-control form-control-sm" type="checkbox"
+                   data-toggle="toggle" checked>
             <button id="clear_btn" class="btn btn-sm btn-outline-success ml-5">리셋</button>
         </div>
         {{ macros.m_tab_content_end() }}
@@ -41,48 +44,8 @@
     <script>
         "use strict";
         const package_name = '{{ arg["package_name"] }}';
-
-        const socket = io.connect(`${location.origin}/log`);
-        socket.emit('start', {
-            'package': '{{ arg["log"] }}'
-        });
-
-        socket.on('on_start', (data) => {
-            const log_textarea = document.getElementById('log_textarea');
-            log_textarea.value += data.data;
-            log_textarea.scrollTop = log_textarea.scrollHeight;
-        });
-
-        socket.on('add', (data) => {
-            if (data.package === '{{ arg["log"] }}') {
-                const add_textarea = document.getElementById('add_textarea');
-                add_textarea.value += data.data;
-                if (document.getElementById('auto_scroll').checked) {
-                    add_textarea.scrollTop = add_textarea.scrollHeight;
-                }
-            }
-        });
-
-        const clear_btn = document.getElementById('clear_btn');
-        clear_btn.addEventListener('click', (event) => {
-            event.preventDefault();
-            document.getElementById('add_textarea').value = '';
-        });
-
-        const delete_btn = document.getElementById('delete_btn');
-        delete_btn.addEventListener('click', (event) => {
-            event.preventDefault();
-            fetch(`/${package_name}/ajax/delete`, {
-                method: 'POST',
-                cache: 'no-cache',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-                },
-                body: new URLSearchParams({
-                    log: '{{ arg["log"] }}'
-                })
-            });
-        });
+        const log = '{{ arg["log"] }}';
     </script>
+    <script src="{{ url_for('.static', filename='%s.js' % arg['template_name']) }}"></script>
 
 {% endblock %}

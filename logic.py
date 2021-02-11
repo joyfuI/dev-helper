@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-#########################################################
 # python
 import os
 import sys
@@ -20,7 +19,7 @@ import lxml.html
 # sjva 공용, 패키지
 from framework import path_data, app, celery
 from framework.util import Util
-#########################################################
+
 
 class Logic(object):
     @staticmethod
@@ -33,15 +32,13 @@ class Logic(object):
     def plugin_unload():
         pass
 
-#########################################################
-
     @staticmethod
     def get_app_config():
         try:
             config = {}
             for key, value in app.config.items():
                 config[key] = value
-            del config['SECRET_KEY']    # 해당 키가 있으면 보이지 않고 오류 발생.. 무슨 마법이지;
+            del config['SECRET_KEY']  # 해당 키가 있으면 보이지 않고 오류 발생.. 무슨 마법이지;
             config = json.dumps(config, sort_keys=True, indent=4, default=lambda x: str(x))
             config = config.replace('\n', '<br>').replace('  ', '&nbsp;&nbsp;')
             return config
@@ -211,7 +208,7 @@ class Logic(object):
     @staticmethod
     def ffmpeg_update(type, name):
         try:
-            if platform.machine() == 'x86_64' and app.config['config']['running_type'] == 'docker': # 도커 환경에서만
+            if platform.machine() == 'x86_64' and app.config['config']['running_type'] == 'docker':  # 도커 환경에서만
                 if type == 'git':
                     url = 'https://johnvansickle.com/ffmpeg/builds/ffmpeg-git-amd64-static.tar.xz'
                     dir = 'ffmpeg-git-' + name + '-amd64-static'
@@ -239,7 +236,7 @@ class Logic(object):
         filename = os.path.join(path_data, 'download_tmp', 'ffmpeg-amd64-static.tar.xz')
         response = requests.get(url, allow_redirects=True)
         with open(filename, 'wb') as f:
-            f.write(response.content)    # 다운로드
+            f.write(response.content)  # 다운로드
         # 아 zx 압축해제가 파이썬 3.3부터 지원하넹...
         print('tar xvfJ %s -C %s' % (filename, os.path.join(path_data, 'download_tmp')))
         output = subprocess.check_output(['tar', 'xvfJ', filename, '-C', os.path.join(path_data, 'download_tmp')],
@@ -252,8 +249,10 @@ class Logic(object):
         # shutil.move(os.path.join(path_data, 'download_tmp', dir, 'ffprobe'), '/usr/bin/ffprobe')
         # print('mv %s %s' % (os.path.join(path_data, 'download_tmp', dir, 'qt-faststart'), '/usr/bin/qt-faststart'))
         # shutil.move(os.path.join(path_data, 'download_tmp', dir, 'qt-faststart'), '/usr/bin/qt-faststart')
-        print('mv %s %s' % (os.path.join(path_data, 'download_tmp', dir, 'ffmpeg'), os.path.join(path_data, 'download', 'ffmpeg')))
-        shutil.move(os.path.join(path_data, 'download_tmp', dir, 'ffmpeg'), os.path.join(path_data, 'download', 'ffmpeg'))
+        print('mv %s %s' % (os.path.join(path_data, 'download_tmp', dir, 'ffmpeg'),
+                            os.path.join(path_data, 'download', 'ffmpeg')))
+        shutil.move(os.path.join(path_data, 'download_tmp', dir, 'ffmpeg'),
+                    os.path.join(path_data, 'download', 'ffmpeg'))
         # 다운로드 삭제
         print('rm %s' % filename)
         os.remove(filename)

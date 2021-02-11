@@ -3,7 +3,9 @@
 
     <ul class="nav nav-pills bg-light shadow text-dark">
         {% for i in arg['dbs'] %}
-            <li class="nav-item"><a class="nav-link {{ 'active' if i == arg['db'] else '' }}" href="./{{ i }}">{{ i }}</a></li>
+            <li class="nav-item">
+                <a class="nav-link {{ 'active' if i == arg['db'] else '' }}" href="./{{ i }}">{{ i }}</a>
+            </li>
         {% endfor %}
     </ul>
     <div class="d-inline-block"></div>
