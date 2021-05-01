@@ -1,22 +1,19 @@
-# -*- coding: utf-8 -*-
-# python
 import os
 import sys
-import subprocess
-import traceback
 import platform
 import glob
 import shutil
+import traceback
+import tarfile
+import subprocess
 import json
-from threading import Thread
 import sqlite3
+import urllib.request
+from threading import Thread
 from collections import OrderedDict
 
-# third-party
-import requests
 import lxml.html
 
-# sjva 공용, 패키지
 from framework import path_data, app, celery
 from framework.util import Util
 
@@ -50,22 +47,18 @@ class Logic(object):
     @staticmethod
     def get_platform():
         try:
-            platform_list = []
-            platform_list.append(['platform.machine()', platform.machine()])
-            platform_list.append(['platform.node()', platform.node()])
-            platform_list.append(['platform.platform()', platform.platform()])
-            platform_list.append(['platform.processor()', platform.processor()])
-            platform_list.append(['platform.python_build()', platform.python_build()])
-            platform_list.append(['platform.python_compiler()', platform.python_compiler()])
-            platform_list.append(['platform.python_branch()', platform.python_branch()])
-            platform_list.append(['platform.python_implementation()', platform.python_implementation()])
-            platform_list.append(['platform.python_revision()', platform.python_revision()])
-            platform_list.append(['platform.python_version()', platform.python_version()])
-            platform_list.append(['platform.python_version_tuple()', platform.python_version_tuple()])
-            platform_list.append(['platform.release()', platform.release()])
-            platform_list.append(['platform.system()', platform.system()])
-            platform_list.append(['platform.version()', platform.version()])
-            platform_list.append(['platform.uname()', platform.uname()])
+            platform_list = [['platform.machine()', platform.machine()], ['platform.node()', platform.node()],
+                             ['platform.platform()', platform.platform()],
+                             ['platform.processor()', platform.processor()],
+                             ['platform.python_build()', platform.python_build()],
+                             ['platform.python_compiler()', platform.python_compiler()],
+                             ['platform.python_branch()', platform.python_branch()],
+                             ['platform.python_implementation()', platform.python_implementation()],
+                             ['platform.python_revision()', platform.python_revision()],
+                             ['platform.python_version()', platform.python_version()],
+                             ['platform.python_version_tuple()', platform.python_version_tuple()],
+                             ['platform.release()', platform.release()], ['platform.system()', platform.system()],
+                             ['platform.version()', platform.version()], ['platform.uname()', platform.uname()]]
             return platform_list
         except Exception as e:
             print('Exception:%s', e)
@@ -75,11 +68,8 @@ class Logic(object):
     @staticmethod
     def get_sys():
         try:
-            sys_list = []
-            sys_list.append(['sys.argv', sys.argv])
-            sys_list.append(['sys.executable', sys.executable])
-            sys_list.append(['sys.path', sys.path])
-            sys_list.append(['sys.platform', sys.platform])
+            sys_list = [['sys.argv', sys.argv], ['sys.executable', sys.executable], ['sys.path', sys.path],
+                        ['sys.platform', sys.platform]]
             return sys_list
         except Exception as e:
             print('Exception:%s', e)
@@ -195,10 +185,10 @@ class Logic(object):
     @staticmethod
     def get_ffmpeg_new():
         try:
-            html = requests.get('https://johnvansickle.com/ffmpeg/', allow_redirects=True).text
-            root = lxml.html.fromstring(html)
-            git_master = root.xpath('//table/tr[1]/th[1]/text()')[0][21:]
-            release = root.xpath('//table/tr[1]/th[2]/text()')[0][9:]
+            with urllib.request.urlopen('https://johnvansickle.com/ffmpeg/') as response:
+                html = lxml.html.fromstring(response.read())
+            git_master = html.xpath('//table/tr[1]/th[1]/text()')[0][21:]
+            release = html.xpath('//table/tr[1]/th[2]/text()')[0][9:]
             return git_master, release
         except Exception as e:
             print('Exception:%s', e)
@@ -208,7 +198,7 @@ class Logic(object):
     @staticmethod
     def ffmpeg_update(type, name):
         try:
-            if platform.machine() == 'x86_64' and app.config['config']['running_type'] == 'docker':  # 도커 환경에서만
+            if platform.machine() == 'x86_64' and platform.system() == 'Linux':  # 리눅스 환경에서만
                 if type == 'git':
                     url = 'https://johnvansickle.com/ffmpeg/builds/ffmpeg-git-amd64-static.tar.xz'
                     dir = 'ffmpeg-git-' + name + '-amd64-static'
@@ -234,14 +224,12 @@ class Logic(object):
     @celery.task
     def ffmpeg_download(url, dir):
         filename = os.path.join(path_data, 'download_tmp', 'ffmpeg-amd64-static.tar.xz')
-        response = requests.get(url, allow_redirects=True)
-        with open(filename, 'wb') as f:
-            f.write(response.content)  # 다운로드
-        # 아 zx 압축해제가 파이썬 3.3부터 지원하넹...
-        print('tar xvfJ %s -C %s' % (filename, os.path.join(path_data, 'download_tmp')))
-        output = subprocess.check_output(['tar', 'xvfJ', filename, '-C', os.path.join(path_data, 'download_tmp')],
-                                         universal_newlines=True)
-        print(output)
+        print('download %s' % url)
+        urllib.request.urlretrieve(url, filename)
+        print('tar xfJ %s -C %s' % (filename, os.path.join(path_data, 'download_tmp')))
+        with tarfile.open(filename) as xz:
+            xz.extractall(os.path.join(path_data, 'download_tmp'))  # xz 압축해제
+        # print(output)
         # 덮어쓰기
         # print('mv %s %s' % (os.path.join(path_data, 'download_tmp', dir, 'ffmpeg'), '/usr/bin/ffmpeg'))
         # shutil.move(os.path.join(path_data, 'download_tmp', dir, 'ffmpeg'), '/usr/bin/ffmpeg')

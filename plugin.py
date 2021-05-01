@@ -1,18 +1,14 @@
-# -*- coding: utf-8 -*-
-# python
 import os
 import traceback
 
-# third-party
 from flask import Blueprint, request, render_template, redirect, jsonify
 from flask_login import login_required
 
-# sjva 공용
 from framework import path_app_root, path_data
 
-# 패키지
-package_name = __name__.split('.')[0]
 from .logic import Logic
+
+package_name = __name__.split('.')[0]
 
 #########################################################
 # 플러그인 공용
