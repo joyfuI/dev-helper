@@ -1,15 +1,16 @@
 import os
 import traceback
+import json
 
 from flask import Blueprint, request, render_template, redirect, jsonify
 from flask_login import login_required
 
 from framework import path_app_root, path_data
 
-from .logic import Logic
-
-package_name = __name__.split('.')[0]
-
+try:
+    from logic import Logic
+except:
+    from .logic import Logic
 #########################################################
 # 플러그인 공용
 #########################################################
@@ -154,6 +155,26 @@ def ajax(sub):
             name = request.form['name']
             ret = Logic.ffmpeg_update(type, name)
             return jsonify(ret)
+        elif sub == 'edit_db':
+            data = request.form
+            if 'origin_data' in data and 'req_data' in data:
+                req_data = json.loads(data['req_data'])
+                db = data['db']
+                table = data['table']
+                origin_data = json.loads(data['origin_data'])
+                result = Logic.edit_db(db, table, origin_data, req_data)
+                return jsonify(result)
+            return jsonify('fail')
+        elif sub == 'delete_db':
+            data = request.form
+            if 'req_data' in data:
+                req_data = json.loads(data['req_data'])
+                db = data['db']
+                table = data['table']
+                result = Logic.delete_db(db, table, req_data)
+                return jsonify(result)
+            return jsonify('fail')
+
     except Exception as e:
         print('Exception:%s', e)
         print(traceback.format_exc())
