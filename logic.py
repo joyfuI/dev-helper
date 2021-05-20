@@ -22,7 +22,10 @@ class Logic(object):
     @staticmethod
     def plugin_load():
         # 편의를 위해 json 파일 생성
-        from .plugin import plugin_info
+        try:
+            from plugin import plugin_info
+        except:
+            from .plugin import plugin_info
         Util.save_from_dict_to_json(plugin_info, os.path.join(os.path.dirname(__file__), 'info.json'))
 
     @staticmethod
@@ -246,3 +249,54 @@ class Logic(object):
         os.remove(filename)
         print('rm -r %s' % os.path.join(path_data, 'download_tmp', dir))
         shutil.rmtree(os.path.join(path_data, 'download_tmp', dir))
+
+    @staticmethod
+    def edit_db(db_name, table_name, origin_data, update_data):
+        # DB row를 수동으로 편집하는 기능
+        connect = sqlite3.connect(os.path.join(path_data, 'db', '%s.db' % db_name))
+        cursor = connect.cursor()
+        set_pharse = []
+        for key, val in update_data.items():
+            if val is not None:
+                set_pharse.append(key + " = '" + str(val).replace("'", "\\\'") + "' ")
+            else:
+                set_pharse.append(key + ' = null ')
+
+        where_pharse = []
+        for key,val in origin_data.items():
+            if val is not None:
+                where_pharse.append(key + " = '" + str(val).replace("'", "\\\'") + "' ")
+            else:
+                where_pharse.append(key + ' IS null ')
+        sql = '''
+        UPDATE {} SET {} WHERE {}
+        '''.format(table_name, ' , '.join(set_pharse),' AND '.join(where_pharse))
+        try:
+            cursor.execute(sql)
+        except:
+            return traceback.format_exc()
+        connect.commit()
+        connect.close()
+        return 'success'
+
+    @staticmethod
+    def delete_db(db_name, table_name, delete_data):
+        # DB row를 수동으로 삭제하는 기능 
+        connect = sqlite3.connect(os.path.join(path_data, 'db', '%s.db' % db_name))
+        cursor = connect.cursor()
+        where_pharse = []
+        for key,val in delete_data.items():
+            if val is not None:
+                where_pharse.append(key + " = '" + str(val).replace("'", "\\\'") + "' ")
+            else:
+                where_pharse.append(key + ' IS null ')
+        sql = '''
+        DELETE FROM {} WHERE {}
+        '''.format(table_name, ' AND '.join(where_pharse))
+        try:
+            cursor.execute(sql)
+        except:
+            return traceback.format_exc()
+        connect.commit()
+        connect.close()
+        return 'success'
