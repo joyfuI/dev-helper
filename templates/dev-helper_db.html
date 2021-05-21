@@ -37,11 +37,15 @@
                             {% endfor %}
                             <td>
                                 <div class="btn-group btn-group-sm flex-wrap mr-2" role="group">
+                                    <button id="btn_db_edit_{{ loop.index0 }}" name="btn_db_edit_{{ loop.index0 }}"
+                                            class="btn btn-sm btn-outline-success btn_db_edit" data-db="{{ arg['db'] }}"
+                                            data-column="{{ i }}">Edit
+                                    </button>
 
-                                    <button id="btn_db_edit_{{ loop.index0 }}" name="btn_db_edit_{{ loop.index0 }}" class="btn btn-sm btn-outline-success btn_db_edit" data-db="{{ arg['db'] }}" data-column="{{ i }}">Edit</button>
-
-                                    <button id="btn_db_delete_{{ loop.index0 }}" name="btn_db_delete_{{ loop.index0 }}" class="btn btn-sm btn-outline-danger btn_db_delete" data-db="{{ arg['db'] }}" data-column="{{ i }}">Delete</button>
-
+                                    <button id="btn_db_delete_{{ loop.index0 }}" name="btn_db_delete_{{ loop.index0 }}"
+                                            class="btn btn-sm btn-outline-danger btn_db_delete"
+                                            data-db="{{ arg['db'] }}" data-column="{{ i }}">Delete
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -53,118 +57,30 @@
     </div>
 
     <div class="modal fade" id="modal_db_edit" tabindex="-1" role="dialog" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 class="modal-title" id="modal-title">DB 내용 수정</h4>
-                        <h3 class="db_edit_property"><strong id="db_edit_property_db"></strong>-<strong id="db_edit_property_table"></strong></h3>
-                    </div>
-                    <div class="modal-body" id="modal-body" style="word-break: break-all;">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="modal-title">DB 내용 수정</h4>
+                    <h3 class="db_edit_property"><strong id="db_edit_property_db"></strong>-<strong
+                            id="db_edit_property_table"></strong></h3>
+                </div>
+                <div class="modal-body" id="modal-body" style="word-break: break-all;">
 
-                    </div>
-                    <div class="modal-footer" id="modal-footer">
-                        <button type="button" id="btn_edit_save" class="btn btn-success" data-dismiss="modal">Save</button>
-                        <button type="button" id="btn_edit_close" class="btn btn-default" data-dismiss="modal">Close</button>
-                    </div>
+                </div>
+                <div class="modal-footer" id="modal-footer">
+                    <button type="button" id="btn_edit_save" class="btn btn-success" data-dismiss="modal">Save</button>
+                    <button type="button" id="btn_edit_close" class="btn btn-default" data-dismiss="modal">Close
+                    </button>
                 </div>
             </div>
-
-
+        </div>
     </div>
-
 
     <script>
         "use strict";
         const package_name = '{{ arg["package_name"] }}';
-        let origin_data = {};
-        $('.btn_db_edit').each((idx,element)=>{
-            $(element).on('click',(evt)=>{
-                let db = $(element).attr('data-db');
-                let table = $(element).attr('data-column');
-                let row_num = $(element).attr('id').split('_')[$(element).attr('id').split('_').length-1];
-                let columns = {{ arg["tables"]|tojson }} ;
-                let target_data = columns[table][Number(row_num)];
-                origin_data = target_data;
-                let new_html = '';
-                for (let [k,v] of Object.entries(target_data)){
-                    new_html += `{{ macros.setting_input_text('column_${k}', '${k}','${v}' , col='9', desc='') }}`;
-                }
-                $('#modal-body').html(new_html);
-                $('#db_edit_property_db').text(db);
-                $('#db_edit_property_table').text(table);
-                $('#modal_db_edit').modal('toggle');
-
-            });
-        });
-        $('.btn_db_delete').click((evt)=>{
-            let element = evt.currentTarget;
-            let db = $(element).attr('data-db');
-            let table = $(element).attr('data-column');
-            let row_num = $(element).attr('id').split('_')[$(element).attr('id').split('_').length-1];
-            let columns = {{ arg["tables"]|tojson }} ;
-            let target_data = columns[table][Number(row_num)];
-
-            if (confirm(`정말 삭제하시겠습니까?\n${JSON.stringify(target_data)}`)){
-                $.ajax({
-                    url: `/${package_name}/ajax/delete_db`,
-                    type: 'POST',
-                    cache: false,
-                    data : {
-                        db:db,
-                        table: table,
-                        req_data: JSON.stringify(target_data)
-                    },
-                    dataType: 'json'
-                }).done((res)=>{
-                    location.reload();
-                }).fail((res)=>{
-                    console.log(res);
-            });
-            }
-        });
-
-        $('#btn_edit_save').click((evt)=>{
-            let req_data = {}
-            let rows = $('#modal-body').children();
-            let db = $('#db_edit_property_db').text().trim();
-            let table = $('#db_edit_property_table').text().trim();
-            for (let row of rows){
-                let key = $($(row).children()[0]).children().text().trim();
-                let val = $($($(row).children()[1]).children()[0]).children().val().trim()
-                if (val === 'null'){
-                    val = null;
-                }
-                switch(val){
-                    case 'null':
-                        val = null;
-                        break;
-                    case 'True':
-                        val = true;
-                        break;
-                    case 'False':
-                        val = false;
-                        break;
-                }
-                req_data[key] = val;
-            }
-            $.ajax({
-                    url: `/${package_name}/ajax/edit_db`,
-                    type: 'POST',
-                    cache: false,
-                    data: {
-                        db : db,
-                        table : table,
-                        origin_data : JSON.stringify(origin_data),
-                        req_data : JSON.stringify(req_data)
-                    },
-                    dataType: 'json'
-
-                }).done((res)=>{
-                    location.reload();
-                }).fail((res)=>{
-                    console.log(res);
-            });
-        });
+        const tables = {{ arg["tables"]|tojson }};
     </script>
+    <script src="{{ url_for('.static', filename='%s.js' % arg['template_name']) }}"></script>
 
 {% endblock %}
