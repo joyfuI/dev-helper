@@ -25,13 +25,13 @@ socket.on('add', (data) => {
     }
 });
 
-clear_btn.addEventListener('click', (event) => {
-    event.preventDefault();
+clear_btn.addEventListener('click', (e) => {
+    e.preventDefault();
     add_textarea.value = '';
 });
 
-delete_btn.addEventListener('click', (event) => {
-    event.preventDefault();
+delete_btn.addEventListener('click', (e) => {
+    e.preventDefault();
     fetch(`/${package_name}/ajax/delete`, {
         method: 'POST',
         cache: 'no-cache',

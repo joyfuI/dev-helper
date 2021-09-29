@@ -1,178 +1,61 @@
 import os
 import traceback
-import json
 
-from flask import Blueprint, request, render_template, redirect, jsonify
-from flask_login import login_required
+from flask import Blueprint
 
-from framework import path_app_root, path_data
-
-from .logic import Logic
-
-package_name = __name__.split('.')[0]
-
-#########################################################
-# 플러그인 공용
-#########################################################
-blueprint = Blueprint(package_name, package_name, url_prefix='/%s' % package_name,
-                      template_folder=os.path.join(os.path.dirname(__file__), 'templates'),
-                      static_folder=os.path.join(os.path.dirname(__file__), 'static'))
-
-menu = {
-    'main': [package_name, '플러그인 개발'],
-    'sub': [
-        ['info', '정보'], ['py', '파이썬'], ['db', '데이터베이스'], ['log', '로그'], ['lib', '라이브러리'], ['macro', '템플릿 매크로']
-    ],
-    'category': 'tool'
-}
-
-plugin_info = {
-    'version': 'canary',
-    'name': 'dev-helper',
-    'category_name': 'tool',
-    'developer': 'joyfuI',
-    'description': '플러그인 개발 편의을 위한 잡다한 기능',
-    'home': 'https://github.com/joyfuI/dev-helper',
-    'more': ''
-}
+from framework.util import Util
+from framework.logger import get_logger
+from framework.common.plugin import Logic, default_route_single_module
 
 
-def plugin_load():
-    Logic.plugin_load()
+class P(object):
+    package_name = __name__.split('.')[0]
+    logger = get_logger(package_name)
+    logger.removeHandler(logger.handlers[0])  # 로그를 파일로 부분 제거
+    blueprint = Blueprint(package_name, package_name, url_prefix=f'/{package_name}',
+                          template_folder=os.path.join(os.path.dirname(__file__), 'templates'),
+                          static_folder=os.path.join(os.path.dirname(__file__), 'static'))
+
+    # 메뉴 정의
+    menu = {
+        'main': [package_name, '플러그인 개발'],
+        'sub': [
+            ['info', '정보'], ['py', '파이썬'], ['db', '데이터베이스'], ['logfile', '로그'], ['lib', '라이브러리'], ['macro', '템플릿 매크로']
+        ],
+        'category': 'tool'
+    }
+
+    plugin_info = {
+        'version': 'canary',
+        'name': package_name,
+        'category_name': 'tool',
+        'icon': '',
+        'developer': 'joyfuI',
+        'description': '플러그인 개발 편의을 위한 잡다한 기능',
+        'home': f'https://github.com/joyfuI/{package_name}',
+        'more': '',
+    }
+
+    ModelSetting = None
+    logic = None
+    module_list = None
+    home_module = 'info'  # 기본모듈
 
 
-def plugin_unload():
-    Logic.plugin_unload()
-
-
-#########################################################
-# WEB Menu
-#########################################################
-@blueprint.route('/')
-def home():
-    return redirect('/%s/info' % package_name)
-
-
-@blueprint.route('/<sub>')
-@login_required
-def first_menu(sub):
+def initialize():
     try:
-        arg = {
-            'package_name': package_name,
-            'template_name': '%s_%s' % (package_name, sub)
-        }
+        Util.save_from_dict_to_json(P.plugin_info, os.path.join(os.path.dirname(__file__), 'info.json'))
 
-        if sub == 'info':
-            arg['path_app_root'] = path_app_root
-            arg['path_data'] = path_data
-            arg['config'] = Logic.get_app_config()
-            arg['platform'] = Logic.get_platform()
-            arg['sys'] = Logic.get_sys()
-            return render_template('%s_%s.html' % (package_name, sub), arg=arg)
+        # 로드할 모듈 정의
+        from .main import LogicMain
+        P.module_list = [LogicMain(P)]
 
-        elif sub == 'py':
-            arg['packages'] = Logic.get_package_list()
-            return render_template('%s_%s.html' % (package_name, sub), arg=arg)
-
-        elif sub == 'db':
-            return redirect('/%s/%s/sjva' % (package_name, sub))
-
-        elif sub == 'log':
-            return redirect('/%s/%s/framework' % (package_name, sub))
-
-        elif sub == 'lib':
-            arg['ffmpeg_git'], arg['ffmpeg_release'] = Logic.get_ffmpeg_new()
-            return render_template('%s_%s.html' % (package_name, sub), arg=arg)
-
-        elif sub == 'macro':
-            return render_template('%s_%s.html' % (package_name, sub), arg=arg)
+        P.logic = Logic(P)
+        default_route_single_module(P)
     except Exception as e:
-        print('Exception:%s', e)
-        print(traceback.format_exc())
-    return render_template('sample.html', title='%s - %s' % (package_name, sub))
+        P.logger.error('Exception:%s', e)
+        P.logger.error(traceback.format_exc())
 
 
-@blueprint.route('/<sub>/<sub2>')
-@login_required
-def second_menu(sub, sub2):
-    try:
-        arg = {
-            'package_name': package_name,
-            'template_name': '%s_%s' % (package_name, sub)
-        }
-
-        if sub == 'db':
-            arg['dbs'] = Logic.get_db_list()
-            if sub2 in arg['dbs']:
-                arg['db'] = sub2
-                arg['tables'], arg['cols'] = Logic.get_db_dict(sub2)
-                arg['first_table'] = list(arg['tables'].keys())[0]
-                return render_template('%s_%s.html' % (package_name, sub), arg=arg)
-
-        elif sub == 'log':
-            arg['logs'] = Logic.get_log_list()
-            if sub2 in arg['logs']:
-                arg['log'] = sub2
-                return render_template('%s_%s.html' % (package_name, sub), arg=arg)
-    except Exception as e:
-        print('Exception:%s', e)
-        print(traceback.format_exc())
-    return render_template('sample.html', title='%s - %s - %s' % (package_name, sub, sub2))
-
-
-#########################################################
-# For UI
-#########################################################
-@blueprint.route('/ajax/<sub>', methods=['POST'])
-@login_required
-def ajax(sub):
-    print('AJAX %s %s', package_name, sub)
-    try:
-        if sub == 'install':
-            name = request.form['name']
-            ret = {
-                'title': name,
-                'content': Logic.py_package_install(name).split('\n')
-            }
-            return jsonify(ret)
-
-        elif sub == 'uninstall':
-            name = request.form['name']
-            ret = {
-                'title': name,
-                'content': Logic.py_package_uninstall(name).split('\n')
-            }
-            return jsonify(ret)
-
-        elif sub == 'delete':
-            log = request.form.get('log', None)
-            if log is not None:
-                Logic.log_delete(log)
-            return jsonify([])
-
-        elif sub == 'ffmpeg':
-            type = request.form['type']
-            name = request.form['name']
-            ret = Logic.ffmpeg_update(type, name)
-            return jsonify(ret)
-
-        elif sub == 'edit_db':
-            data = request.form
-            req_data = json.loads(data['req_data'])
-            db = data['db']
-            table = data['table']
-            origin_data = json.loads(data['origin_data'])
-            ret = Logic.edit_db(db, table, origin_data, req_data)
-            return jsonify(ret)
-
-        elif sub == 'delete_db':
-            data = request.form
-            req_data = json.loads(data['req_data'])
-            db = data['db']
-            table = data['table']
-            ret = Logic.delete_db(db, table, req_data)
-            return jsonify(ret)
-
-    except Exception as e:
-        print('Exception:%s', e)
-        print(traceback.format_exc())
+logger = P.logger
+initialize()

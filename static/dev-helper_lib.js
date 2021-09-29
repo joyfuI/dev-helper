@@ -7,8 +7,8 @@ const modal_title = document.getElementById('modal_title');
 const modal_body = document.getElementById('modal_body');
 
 // FFmpeg 버전확인
-ffmpeg_version_btn.addEventListener('click', (event) => {
-    event.preventDefault();
+ffmpeg_version_btn.addEventListener('click', (e) => {
+    e.preventDefault();
     fetch('/ffmpeg/ajax/ffmpeg_version', {
         method: 'POST',
         cache: 'no-cache',
@@ -26,9 +26,15 @@ ffmpeg_version_btn.addEventListener('click', (event) => {
     });
 });
 
+const success = ({data}) => {
+    if (!data.success) {
+        notify(data.message, 'warning');
+    }
+};
+
 // FFmpeg 업데이트 (git master)
-ffmpeg_git_btn.addEventListener('click', (event) => {
-    event.preventDefault();
+ffmpeg_git_btn.addEventListener('click', (e) => {
+    e.preventDefault();
     fetch(`/${package_name}/ajax/ffmpeg`, {
         method: 'POST',
         cache: 'no-cache',
@@ -43,8 +49,8 @@ ffmpeg_git_btn.addEventListener('click', (event) => {
 });
 
 // FFmpeg 업데이트 (release)
-ffmpeg_release_btn.addEventListener('click', (event) => {
-    event.preventDefault();
+ffmpeg_release_btn.addEventListener('click', (e) => {
+    e.preventDefault();
     fetch(`/${package_name}/ajax/ffmpeg`, {
         method: 'POST',
         cache: 'no-cache',
@@ -57,9 +63,3 @@ ffmpeg_release_btn.addEventListener('click', (event) => {
         })
     }).then((response) => response.json()).then(success);
 });
-
-function success(data) {
-    if (!data.success) {
-        notify(data.message, 'warning');
-    }
-}

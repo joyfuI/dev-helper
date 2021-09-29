@@ -5,6 +5,16 @@ const list_div = document.getElementById('list_div');
 const modal_title = document.getElementById('modal_title');
 const modal_body = document.getElementById('modal_body');
 
+const showModal = ({data}) => {
+    let str = '';
+    for (const i of data.content) {
+        str += `<div>${i}</div>`;
+    }
+    modal_title.innerHTML = data.title;
+    modal_body.innerHTML = str;
+    $('#large_modal').modal();
+};
+
 // 패키지 설치
 install_btn.addEventListener('click', (event) => {
     event.preventDefault();
@@ -63,13 +73,3 @@ list_div.addEventListener('click', (event) => {
             break;
     }
 });
-
-function showModal(data) {
-    let str = '';
-    for (const i of data.content) {
-        str += `<div>${i}</div>`;
-    }
-    modal_title.innerHTML = data.title;
-    modal_body.innerHTML = str;
-    $('#large_modal').modal();
-}
