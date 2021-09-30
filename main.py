@@ -16,7 +16,7 @@ import lxml.html
 from flask import render_template, redirect, jsonify
 from flask_login import login_required
 
-from framework import path_app_root, path_data, app, celery
+from framework import path_app_root, path_data, version, app, celery
 from framework.common.plugin import LogicModuleBase
 
 from .plugin import P
@@ -42,6 +42,7 @@ class LogicMain(LogicModuleBase):
             if sub == 'info':
                 arg['path_app_root'] = path_app_root
                 arg['path_data'] = path_data
+                arg['version'] = version
                 arg['config'] = LogicMain.get_app_config()
                 arg['platform'] = LogicMain.get_platform()
                 arg['sys'] = LogicMain.get_sys()
@@ -148,20 +149,19 @@ class LogicMain(LogicModuleBase):
             return jsonify({'ret': 'danger', 'msg': str(e)})
 
     @staticmethod
-    def get_app_config():
+    def get_app_config() -> str:
         config = {}
         for key, value in app.config.items():
             config[key] = value
-        del config['SECRET_KEY']  # 해당 키가 있으면 보이지 않고 오류 발생.. 무슨 마법이지;
         config = json.dumps(config, sort_keys=True, indent=4, default=lambda x: str(x))
         config = config.replace('\n', '<br>').replace('  ', '&nbsp;&nbsp;')
         return config
 
     @staticmethod
-    def get_platform():
-        platform_list = [['platform.machine()', platform.machine()], ['platform.node()', platform.node()],
-                         ['platform.platform()', platform.platform()],
-                         ['platform.processor()', platform.processor()],
+    def get_platform() -> list:
+        platform_list = [['platform.architecture()', platform.architecture()],
+                         ['platform.machine()', platform.machine()], ['platform.node()', platform.node()],
+                         ['platform.platform()', platform.platform()], ['platform.processor()', platform.processor()],
                          ['platform.python_build()', platform.python_build()],
                          ['platform.python_compiler()', platform.python_compiler()],
                          ['platform.python_branch()', platform.python_branch()],
@@ -174,7 +174,7 @@ class LogicMain(LogicModuleBase):
         return platform_list
 
     @staticmethod
-    def get_sys():
+    def get_sys() -> list:
         sys_list = [['sys.argv', sys.argv], ['sys.executable', sys.executable], ['sys.path', sys.path],
                     ['sys.platform', sys.platform]]
         return sys_list
@@ -215,14 +215,14 @@ class LogicMain(LogicModuleBase):
     def get_db_dict(name):
         db_dict = {}
         db_attr = {}
-        connect = sqlite3.connect(os.path.join(path_data, 'db', '%s.db' % name))
+        connect = sqlite3.connect(os.path.join(path_data, 'db', f'{name}.db'))
         cursor = connect.cursor()
 
         cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
         tables = [table[0] for table in cursor.fetchall()]
         for table in tables:
             # 페이지네이션으로 처리하고 싶지만 귀찮아서 일단 500개로 제한
-            cursor.execute("SELECT * FROM '%s' LIMIT 500" % table)
+            cursor.execute(f"SELECT * FROM '{table}' LIMIT 500")
             rows = cursor.fetchall()
             cols = [col[0] for col in cursor.description]
             db_attr[table] = cols
@@ -283,34 +283,34 @@ class LogicMain(LogicModuleBase):
     @celery.task
     def ffmpeg_download(url, path):
         filename = os.path.join(path_data, 'download_tmp', 'ffmpeg-amd64-static.tar.xz')
-        logger.debug('download %s' % url)
+        logger.debug(f'download {url}')
         urllib.request.urlretrieve(url, filename)
-        logger.debug('tar xfJ %s -C %s' % (filename, os.path.join(path_data, 'download_tmp')))
+        logger.debug(f'tar xfJ {filename} -C {os.path.join(path_data, "download_tmp")}')
         with tarfile.open(filename) as xz:
             xz.extractall(os.path.join(path_data, 'download_tmp'))  # xz 압축해제
         # logger.debug(output)
         # 덮어쓰기
-        # logger.debug('mv %s %s' % (os.path.join(path_data, 'download_tmp', path, 'ffmpeg'), '/usr/bin/ffmpeg'))
+        # logger.debug(f'mv {os.path.join(path_data, "download_tmp", path, "ffmpeg")} /usr/bin/ffmpeg')
         # shutil.move(os.path.join(path_data, 'download_tmp', path, 'ffmpeg'), '/usr/bin/ffmpeg')
-        # logger.debug('mv %s %s' % (os.path.join(path_data, 'download_tmp', path, 'ffprobe'), '/usr/bin/ffprobe'))
+        # logger.debug(f'mv {os.path.join(path_data, "download_tmp", path, "ffprobe")} /usr/bin/ffprobe')
         # shutil.move(os.path.join(path_data, 'download_tmp', path, 'ffprobe'), '/usr/bin/ffprobe')
-        # logger.debug('mv %s %s' % (os.path.join(path_data, 'download_tmp', path, 'qt-faststart'), '/usr/bin/qt-faststart'))
+        # logger.debug(f'mv {os.path.join(path_data, "download_tmp", path, "qt-faststart")} /usr/bin/qt-faststart')
         # shutil.move(os.path.join(path_data, 'download_tmp', path, 'qt-faststart'), '/usr/bin/qt-faststart')
-        logger.debug('mv %s %s' % (os.path.join(path_data, 'download_tmp', path, 'ffmpeg'),
-                                   os.path.join(path_data, 'download', 'ffmpeg')))
+        logger.debug(
+            f'mv {os.path.join(path_data, "download_tmp", path, "ffmpeg")} {os.path.join(path_data, "download", "ffmpeg")}')
         shutil.move(os.path.join(path_data, 'download_tmp', path, 'ffmpeg'),
                     os.path.join(path_data, 'download', 'ffmpeg'))
         # 다운로드 삭제
-        logger.debug('rm %s' % filename)
+        logger.debug(f'rm {filename}')
         os.remove(filename)
-        logger.debug('rm -r %s' % os.path.join(path_data, 'download_tmp', path))
+        logger.debug(f'rm -r {os.path.join(path_data, "download_tmp", path)}')
         shutil.rmtree(os.path.join(path_data, 'download_tmp', path))
 
     @staticmethod
     def edit_db(db_name, table_name, origin_data, update_data):
         try:
             # DB row를 수동으로 편집하는 기능
-            connect = sqlite3.connect(os.path.join(path_data, 'db', '%s.db' % db_name))
+            connect = sqlite3.connect(os.path.join(path_data, 'db', f'{db_name}.db'))
             cursor = connect.cursor()
             set_pharse = []
             for key, val in update_data.items():
@@ -341,7 +341,7 @@ class LogicMain(LogicModuleBase):
     def delete_db(db_name, table_name, delete_data):
         try:
             # DB row를 수동으로 삭제하는 기능
-            connect = sqlite3.connect(os.path.join(path_data, 'db', '%s.db' % db_name))
+            connect = sqlite3.connect(os.path.join(path_data, 'db', f'{db_name}.db'))
             cursor = connect.cursor()
             where_pharse = []
             for key, val in delete_data.items():
