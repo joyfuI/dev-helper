@@ -158,7 +158,7 @@ class LogicMain(LogicModuleBase):
         return config
 
     @staticmethod
-    def get_platform() -> list:
+    def get_platform() -> list[list[str]]:
         platform_list = [['platform.architecture()', platform.architecture()],
                          ['platform.machine()', platform.machine()], ['platform.node()', platform.node()],
                          ['platform.platform()', platform.platform()], ['platform.processor()', platform.processor()],
@@ -174,13 +174,13 @@ class LogicMain(LogicModuleBase):
         return platform_list
 
     @staticmethod
-    def get_sys() -> list:
+    def get_sys() -> list[list[str]]:
         sys_list = [['sys.argv', sys.argv], ['sys.executable', sys.executable], ['sys.path', sys.path],
                     ['sys.platform', sys.platform]]
         return sys_list
 
     @staticmethod
-    def get_package_list():
+    def get_package_list() -> list[list[str]]:
         output = subprocess.check_output([sys.executable, '-m', 'pip', 'list'], universal_newlines=True).rstrip()
         packages = []
         for i in output.split('\n')[2:]:
@@ -188,7 +188,7 @@ class LogicMain(LogicModuleBase):
         return packages
 
     @staticmethod
-    def py_package_install(name):
+    def py_package_install(name: str) -> str:
         logger.debug('pip install --upgrade %s', name)
         output = subprocess.check_output([sys.executable, '-m', 'pip', 'install', '--upgrade', name],
                                          universal_newlines=True).rstrip()
@@ -196,7 +196,7 @@ class LogicMain(LogicModuleBase):
         return output
 
     @staticmethod
-    def py_package_uninstall(name):
+    def py_package_uninstall(name: str) -> str:
         logger.debug('pip uninstall -y %s', name)
         output = subprocess.check_output([sys.executable, '-m', 'pip', 'uninstall', '-y', name],
                                          universal_newlines=True).rstrip()

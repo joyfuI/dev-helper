@@ -3,6 +3,7 @@
 
     {{ macros.setting_input_text_and_buttons('package', '설치할 패키지명', [['install_btn', '설치']]) }}
     {{ macros.m_hr() }}
+
     <div id="list_div">
         {% for i in arg['packages'] %}
             {{ macros.info_text_and_buttons(i[0], i[0], [[i[0] + '_btn', i[1]], [i[0] + '_upgrade', '업데이트'], [i[0] + '_uninstall', '제거']]) }}
@@ -12,6 +13,7 @@
     <script>
         "use strict";
         const package_name = '{{ arg["package_name"] }}';
+        const sub = '{{ arg["sub"] }}';
     </script>
     <script src="{{ url_for('.static', filename='%s.js' % arg['template_name']) }}"></script>
 
