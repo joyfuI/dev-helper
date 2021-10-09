@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 const log_textarea = document.getElementById('log_textarea');
 const delete_btn = document.getElementById('delete_btn');

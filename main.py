@@ -27,9 +27,8 @@ ModelSetting = P.ModelSetting
 
 
 class LogicMain(LogicModuleBase):
-    def __init__(self, P):
-        super(LogicMain, self).__init__(P, 'info')  # 해당모듈의 기본 sub
-        self.name = package_name  # 모듈명
+    def __init__(self, p):
+        super(LogicMain, self).__init__(p, None)
 
     def process_menu(self, sub, req):
         try:
@@ -248,7 +247,7 @@ class LogicMain(LogicModuleBase):
 
     @staticmethod
     def log_delete(log):
-        for i in glob.glob(os.path.join(path_data, 'log', log + '.log*')):
+        for i in glob.glob(os.path.join(path_data, 'log', f'{log}.log*')):
             os.remove(i)
 
     @staticmethod
@@ -264,10 +263,10 @@ class LogicMain(LogicModuleBase):
         if platform.machine() == 'x86_64' and platform.system() == 'Linux':  # 리눅스 환경에서만
             if ffmpeg_type == 'git':
                 url = 'https://johnvansickle.com/ffmpeg/builds/ffmpeg-git-amd64-static.tar.xz'
-                path = 'ffmpeg-git-' + name + '-amd64-static'
+                path = f'ffmpeg-git-{name}-amd64-static'
             elif ffmpeg_type == 'release':
                 url = 'https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz'
-                path = 'ffmpeg-' + name + '-amd64-static'
+                path = f'ffmpeg-{name}-amd64-static'
             else:
                 return {'success': False, 'message': '잘못된 타입'}
             args = (url, path)

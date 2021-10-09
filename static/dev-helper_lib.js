@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 const ffmpeg_version_btn = document.getElementById('ffmpeg_version_btn');
 const ffmpeg_git_btn = document.getElementById('ffmpeg_git_btn');

@@ -1,11 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
 
-    {{ macros.info_text_and_buttons('ffmpeg_download', 'FFmpeg 다운로드', [['ffmpeg_version_btn', '버전확인'], ['ffmpeg_git_btn', 'git master'], ['ffmpeg_release_btn', 'release']], desc=['git master: ' + arg['ffmpeg_git'], 'release: ' + arg['ffmpeg_release']]) }}
+    {{ macros.info_text_and_buttons('ffmpeg_download', 'FFmpeg 다운로드', [['ffmpeg_version_btn', '버전확인'], ['ffmpeg_git_btn', 'git master'], ['ffmpeg_release_btn', 'release']], desc=['git master: %s' % arg['ffmpeg_git'], 'release: %s' % arg['ffmpeg_release']]) }}
 
     <script>
-        "use strict";
+        'use strict';
         const package_name = '{{ arg["package_name"] }}';
+        const sub = '{{ arg["sub"] }}';
         const ffmpeg_git = '{{ arg["ffmpeg_git"] }}';
         const ffmpeg_release = '{{ arg["ffmpeg_release"] }}';
     </script>

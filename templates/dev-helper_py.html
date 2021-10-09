@@ -6,12 +6,12 @@
 
     <div id="list_div">
         {% for i in arg['packages'] %}
-            {{ macros.info_text_and_buttons(i[0], i[0], [[i[0] + '_btn', i[1]], [i[0] + '_upgrade', '업데이트'], [i[0] + '_uninstall', '제거']]) }}
+            {{ macros.info_text_and_buttons(i[0], i[0], [['%s_btn' % i[0], i[1]], ['%s_upgrade' % i[0], '업데이트'], ['%s_uninstall' % i[0], '제거']]) }}
         {% endfor %}
     </div>
 
     <script>
-        "use strict";
+        'use strict';
         const package_name = '{{ arg["package_name"] }}';
         const sub = '{{ arg["sub"] }}';
     </script>
