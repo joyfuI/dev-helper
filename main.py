@@ -157,7 +157,7 @@ class LogicMain(LogicModuleBase):
         return config
 
     @staticmethod
-    def get_platform() -> list[list[str]]:
+    def get_platform() -> list:
         platform_list = [['platform.architecture()', platform.architecture()],
                          ['platform.machine()', platform.machine()], ['platform.node()', platform.node()],
                          ['platform.platform()', platform.platform()], ['platform.processor()', platform.processor()],
@@ -173,13 +173,13 @@ class LogicMain(LogicModuleBase):
         return platform_list
 
     @staticmethod
-    def get_sys() -> list[list[str]]:
+    def get_sys() -> list:
         sys_list = [['sys.argv', sys.argv], ['sys.executable', sys.executable], ['sys.path', sys.path],
                     ['sys.platform', sys.platform]]
         return sys_list
 
     @staticmethod
-    def get_package_list() -> list[list[str]]:
+    def get_package_list() -> list:
         output = subprocess.check_output([sys.executable, '-m', 'pip', 'list'], universal_newlines=True).rstrip()
         packages = []
         for i in output.split('\n')[2:]:
