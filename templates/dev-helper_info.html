@@ -1,27 +1,16 @@
-{% extends "base.html" %}
-{% block content %}
+{% extends "base.html" %} {% block content %} {{
+macros.info_text('path_app_root', 'path_app_root', arg['path_app_root']) }} {{
+macros.info_text('path_data', 'path_data', arg['path_data']) }} {{
+macros.info_text('version', 'version', arg['version']) }} {{
+macros.info_text('app.config', 'app.config', arg['config']|safe) }} {{
+macros.m_hr() }} {% for i in arg['platform'] %} {{ macros.info_text(i[0], i[0],
+i[1]) }} {% endfor %} {{ macros.m_hr() }} {% for i in arg['sys'] %} {{
+macros.info_text(i[0], i[0], i[1]) }} {% endfor %}
 
-    {{ macros.info_text('path_app_root', 'path_app_root', arg['path_app_root']) }}
-    {{ macros.info_text('path_data', 'path_data', arg['path_data']) }}
-    {{ macros.info_text('version', 'version', arg['version']) }}
-    {{ macros.info_text('app.config', 'app.config', arg['config']|safe) }}
-
-    {{ macros.m_hr() }}
-
-    {% for i in arg['platform'] %}
-        {{ macros.info_text(i[0], i[0], i[1]) }}
-    {% endfor %}
-
-    {{ macros.m_hr() }}
-
-    {% for i in arg['sys'] %}
-        {{ macros.info_text(i[0], i[0], i[1]) }}
-    {% endfor %}
-
-    <script>
-        'use strict';
-        const package_name = '{{ arg["package_name"] }}';
-        const sub = '{{ arg["sub"] }}';
-    </script>
+<script>
+  'use strict';
+  const package_name = '{{ arg["package_name"] }}';
+  const sub = '{{ arg["sub"] }}';
+</script>
 
 {% endblock %}

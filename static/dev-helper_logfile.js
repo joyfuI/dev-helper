@@ -8,38 +8,38 @@ const auto_scroll = document.getElementById('auto_scroll');
 
 const socket = io.connect(`${location.origin}/log`);
 socket.emit('start', {
-    'package': log
+  package: log,
 });
 
 socket.on('on_start', (data) => {
-    log_textarea.value += data.data;
-    log_textarea.scrollTop = log_textarea.scrollHeight;
+  log_textarea.value += data.data;
+  log_textarea.scrollTop = log_textarea.scrollHeight;
 });
 
 socket.on('add', (data) => {
-    if (data.package === log) {
-        add_textarea.value += data.data;
-        if (auto_scroll.checked) {
-            add_textarea.scrollTop = add_textarea.scrollHeight;
-        }
+  if (data.package === log) {
+    add_textarea.value += data.data;
+    if (auto_scroll.checked) {
+      add_textarea.scrollTop = add_textarea.scrollHeight;
     }
+  }
 });
 
 clear_btn.addEventListener('click', (e) => {
-    e.preventDefault();
-    add_textarea.value = '';
+  e.preventDefault();
+  add_textarea.value = '';
 });
 
 delete_btn.addEventListener('click', (e) => {
-    e.preventDefault();
-    fetch(`/${package_name}/ajax/delete`, {
-        method: 'POST',
-        cache: 'no-cache',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-        },
-        body: new URLSearchParams({
-            log: log
-        })
-    });
+  e.preventDefault();
+  fetch(`/${package_name}/ajax/delete`, {
+    method: 'POST',
+    cache: 'no-cache',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+    },
+    body: new URLSearchParams({
+      log: log,
+    }),
+  });
 });
