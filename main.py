@@ -36,6 +36,7 @@ class LogicMain(LogicModuleBase):
                 "package_name": package_name,
                 "sub": sub,
                 "template_name": f"{package_name}_{sub}",
+                "package_version": P.plugin_info["version"],
             }
 
             if sub == "info":

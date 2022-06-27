@@ -11,6 +11,6 @@ macros.info_text_and_buttons('ffmpeg_download', 'FFmpeg 다운로드',
   const ffmpeg_git = '{{ arg["ffmpeg_git"] }}';
   const ffmpeg_release = '{{ arg["ffmpeg_release"] }}';
 </script>
-<script src="{{ url_for('.static', filename='%s.js' % arg['template_name']) }}"></script>
+<script src="{{ url_for('.static', filename='%s.js' % arg['template_name']) }}?ver={{ arg['package_version'] }}"></script>
 
 {% endblock %}
