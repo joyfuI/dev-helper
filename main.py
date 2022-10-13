@@ -303,7 +303,26 @@ class LogicMain(LogicModuleBase):
         urllib.request.urlretrieve(url, filename)
         logger.debug(f'tar xfJ {filename} -C {os.path.join(path_data, "download_tmp")}')
         with tarfile.open(filename) as xz:
-            xz.extractall(os.path.join(path_data, "download_tmp"))  # xz 압축해제
+            def is_within_directory(directory, target):
+                
+                abs_directory = os.path.abspath(directory)
+                abs_target = os.path.abspath(target)
+            
+                prefix = os.path.commonprefix([abs_directory, abs_target])
+                
+                return prefix == abs_directory
+            
+            def safe_extract(tar, path=".", members=None, *, numeric_owner=False):
+            
+                for member in tar.getmembers():
+                    member_path = os.path.join(path, member.name)
+                    if not is_within_directory(path, member_path):
+                        raise Exception("Attempted Path Traversal in Tar File")
+            
+                tar.extractall(path, members, numeric_owner=numeric_owner) 
+                
+            
+            safe_extract(xz, os.path.join(path_data,"download_tmp"))
         # logger.debug(output)
         # 덮어쓰기
         # logger.debug(f'mv {os.path.join(path_data, "download_tmp", path, "ffmpeg")} /usr/bin/ffmpeg')
